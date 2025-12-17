@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"police-assistant-backend/config"
+	"strconv"
+	"strings"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -113,15 +115,16 @@ func (s *ORSService) GetTrafficInfo(lat, lng float64) (map[string]interface{}, e
 
 // GetAlternativeRoutes gets multiple route options
 func (s *ORSService) GetAlternativeRoutes(origin, destination string) ([]map[string]interface{}, error) {
-	// First, geocode origin and destination
-	originCoords, err := s.geocode(origin)
+	// Parse or geocode origin
+	originCoords, err := s.parseOrGeocode(origin)
 	if err != nil {
-		return nil, fmt.Errorf("failed to geocode origin '%s': %w", origin, err)
+		return nil, fmt.Errorf("failed to process origin '%s': %w", origin, err)
 	}
 
-	destCoords, err := s.geocode(destination)
+	// Parse or geocode destination
+	destCoords, err := s.parseOrGeocode(destination)
 	if err != nil {
-		return nil, fmt.Errorf("failed to geocode destination '%s': %w", destination, err)
+		return nil, fmt.Errorf("failed to process destination '%s': %w", destination, err)
 	}
 
 	log.Printf("🗺️  Finding routes from %s (%.4f,%.4f) to %s (%.4f,%.4f)",
@@ -187,28 +190,64 @@ func (s *ORSService) GetAlternativeRoutes(origin, destination string) ([]map[str
 			conditionEmoji = "🟢"
 		}
 
-		// Extract steps if available
+		// Extract ALL steps (turn-by-turn directions)
 		var steps []map[string]interface{}
 		if segments, ok := route["segments"].([]interface{}); ok && len(segments) > 0 {
-			segment := segments[0].(map[string]interface{})
-			if stepsData, ok := segment["steps"].([]interface{}); ok {
-				for j, step := range stepsData {
-					if j >= 5 { // Limit to first 5 steps
-						break
+			for _, seg := range segments {
+				segment := seg.(map[string]interface{})
+				if stepsData, ok := segment["steps"].([]interface{}); ok {
+					for _, step := range stepsData {
+						s := step.(map[string]interface{})
+
+						// Get instruction
+						instruction := ""
+						if inst, ok := s["instruction"].(string); ok {
+							instruction = inst
+						}
+
+						// Get road name if available
+						roadName := ""
+						if name, ok := s["name"].(string); ok && name != "" && name != "-" {
+							roadName = name
+						}
+
+						// Get step type (turn left, turn right, straight, etc)
+						stepType := ""
+						if sType, ok := s["type"].(float64); ok {
+							stepType = getStepTypeName(int(sType))
+						}
+
+						// Get distance and duration
+						stepDistance := 0.0
+						if dist, ok := s["distance"].(float64); ok {
+							stepDistance = dist
+						}
+
+						stepDuration := 0.0
+						if dur, ok := s["duration"].(float64); ok {
+							stepDuration = dur
+						}
+
+						// Build detailed step info
+						stepInfo := map[string]interface{}{
+							"step_number": len(steps) + 1,
+							"instruction": instruction,
+							"road_name":   roadName,
+							"type":        stepType,
+							"distance":    fmt.Sprintf("%.2f km", stepDistance/1000),
+							"distance_m":  stepDistance,
+							"duration":    fmt.Sprintf("%.1f min", stepDuration/60),
+							"duration_s":  stepDuration,
+						}
+
+						steps = append(steps, stepInfo)
 					}
-					s := step.(map[string]interface{})
-					instruction := ""
-					if inst, ok := s["instruction"].(string); ok {
-						instruction = inst
-					}
-					steps = append(steps, map[string]interface{}{
-						"instruction": instruction,
-						"distance":    fmt.Sprintf("%.2f km", s["distance"].(float64)/1000),
-						"duration":    fmt.Sprintf("%.1f min", s["duration"].(float64)/60),
-					})
 				}
 			}
 		}
+
+		// Log step count for debugging
+		log.Printf("   Route %d: %d steps extracted", i+1, len(steps))
 
 		routeInfo := map[string]interface{}{
 			"route_number":      i + 1,
@@ -269,11 +308,140 @@ func (s *ORSService) ReverseGeocode(lat, lng float64) (string, error) {
 	return "Lokasi tidak diketahui", nil
 }
 
+// getStepTypeName converts ORS step type code to human-readable name
+func getStepTypeName(stepType int) string {
+	switch stepType {
+	case 0:
+		return "Berangkat"
+	case 1:
+		return "Lurus"
+	case 2:
+		return "Belok kanan sedikit"
+	case 3:
+		return "Belok kanan"
+	case 4:
+		return "Belok kanan tajam"
+	case 5:
+		return "Putar balik"
+	case 6:
+		return "Belok kiri tajam"
+	case 7:
+		return "Belok kiri"
+	case 8:
+		return "Belok kiri sedikit"
+	case 9:
+		return "Terus lurus"
+	case 10:
+		return "Masuk bundaran"
+	case 11:
+		return "Keluar bundaran"
+	case 12:
+		return "Tetap di bundaran"
+	case 13:
+		return "Terus"
+	case 14:
+		return "Masuk jalan raya"
+	case 15:
+		return "Sampai tujuan"
+	default:
+		return "Lanjutkan"
+	}
+}
+
+// parseOrGeocode tries to parse coordinates from string, or geocode if it's an address
+func (s *ORSService) parseOrGeocode(location string) (map[string]interface{}, error) {
+	// Try to parse as coordinates first (format: "lat,lng" or "lat, lng")
+	location = strings.TrimSpace(location)
+	parts := strings.Split(location, ",")
+
+	if len(parts) == 2 {
+		latStr := strings.TrimSpace(parts[0])
+		lngStr := strings.TrimSpace(parts[1])
+
+		lat, errLat := strconv.ParseFloat(latStr, 64)
+		lng, errLng := strconv.ParseFloat(lngStr, 64)
+
+		// If both parse successfully, it's coordinates
+		if errLat == nil && errLng == nil {
+			// Validate coordinate ranges
+			if lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180 {
+				log.Printf("🗺️  Parsed coordinates: %.6f, %.6f", lat, lng)
+				return map[string]interface{}{
+					"lat": lat,
+					"lng": lng,
+				}, nil
+			}
+		}
+	}
+
+	// If not valid coordinates, treat as address and geocode
+	log.Printf("🔍 Geocoding address: %s", location)
+	return s.geocode(location)
+}
+
 // geocode converts address to coordinates
 func (s *ORSService) geocode(address string) (map[string]interface{}, error) {
+	// First attempt with full address
+	coords, err := s.geocodeAttempt(address)
+	if err == nil {
+		return coords, nil
+	}
+
+	log.Printf("⚠️  Full address geocoding failed, trying simplified query...")
+
+	// Second attempt: Extract city/locality from address
+	// Common patterns: "Something, City, Province" or "Something City"
+	simplifiedAddress := s.extractMainLocation(address)
+	if simplifiedAddress != address {
+		log.Printf("🔍 Trying with simplified address: %s", simplifiedAddress)
+		coords, err = s.geocodeAttempt(simplifiedAddress)
+		if err == nil {
+			return coords, nil
+		}
+	}
+
+	return nil, fmt.Errorf("could not geocode address: %s", address)
+}
+
+// extractMainLocation tries to extract the main city/locality from full address
+func (s *ORSService) extractMainLocation(address string) string {
+	// Split by comma and look for city names
+	parts := strings.Split(address, ",")
+
+	// Try to find the most relevant part (usually city name)
+	// Common Indonesian cities/areas to prioritize
+	keywords := []string{
+		"Sukabumi", "Jakarta", "Bandung", "Bogor", "Depok",
+		"Tangerang", "Bekasi", "Cianjur", "Purwakarta",
+	}
+
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		for _, keyword := range keywords {
+			if strings.Contains(strings.ToLower(part), strings.ToLower(keyword)) {
+				return keyword
+			}
+		}
+	}
+
+	// If no known city found, return first non-street part
+	if len(parts) >= 2 {
+		// Skip first part (usually street/building), return city
+		return strings.TrimSpace(parts[1])
+	}
+
+	return address
+}
+
+// geocodeAttempt performs a single geocoding attempt
+func (s *ORSService) geocodeAttempt(address string) (map[string]interface{}, error) {
 	params := map[string]string{
 		"text": address,
-		"size": "1",
+		"size": "5",
+		// Focus on Indonesia region for better results
+		"boundary.country": "IDN",
+		"focus.point.lat":  "-6.2",
+		"focus.point.lon":  "106.8",
 	}
 
 	var result map[string]interface{}
@@ -297,13 +465,72 @@ func (s *ORSService) geocode(address string) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("address not found: %s", address)
 	}
 
-	feature := features[0].(map[string]interface{})
-	geometry := feature["geometry"].(map[string]interface{})
+	// Log all found locations for debugging
+	log.Printf("🔍 Found %d location(s) for '%s':", len(features), address)
+	for i, f := range features {
+		feat := f.(map[string]interface{})
+		props := feat["properties"].(map[string]interface{})
+		if label, ok := props["label"].(string); ok {
+			log.Printf("   %d. %s", i+1, label)
+		}
+	}
+
+	// Find the best match (not just "Indonesia")
+	var selectedFeature map[string]interface{}
+	var selectedLabel string
+
+	for _, f := range features {
+		feat := f.(map[string]interface{})
+		props := feat["properties"].(map[string]interface{})
+
+		if label, ok := props["label"].(string); ok {
+			// Skip results that are too generic (just country name)
+			if label == "Indonesia" || label == "Java" {
+				continue
+			}
+
+			// Check if this is a valid location (has locality, region, or county)
+			if locality, hasLoc := props["locality"].(string); hasLoc && locality != "" {
+				selectedFeature = feat
+				selectedLabel = label
+				break
+			}
+
+			if region, hasReg := props["region"].(string); hasReg && region != "" {
+				selectedFeature = feat
+				selectedLabel = label
+				break
+			}
+
+			if county, hasCounty := props["county"].(string); hasCounty && county != "" {
+				selectedFeature = feat
+				selectedLabel = label
+				break
+			}
+
+			// If no specific fields but label is not too generic, use it
+			if len(strings.Split(label, ",")) > 1 {
+				selectedFeature = feat
+				selectedLabel = label
+				break
+			}
+		}
+	}
+
+	// If no good match found, return error
+	if selectedFeature == nil {
+		return nil, fmt.Errorf("no specific location found for: %s", address)
+	}
+
+	geometry := selectedFeature["geometry"].(map[string]interface{})
 	coordinates := geometry["coordinates"].([]interface{})
 
-	// Debug log
+	// Log selected location
+	log.Printf("✅ Selected location: %s", selectedLabel)
+
+	// Debug log coordinates
 	coordBytes, _ := json.Marshal(coordinates)
-	log.Printf("🗺️  Geocoded '%s' to: %s", address, string(coordBytes))
+	log.Printf("🗺️  Coordinates: %s", string(coordBytes))
 
 	return map[string]interface{}{
 		"lng": coordinates[0].(float64),
