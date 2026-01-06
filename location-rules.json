@@ -1,0 +1,92 @@
+[
+  {
+    "No": 1,
+    "Jenis Pelayanan": "Buat SIM Baru (A / C / B / Truk)",
+    "Input": "Satpas SIM terdekat",
+    "Arahkan ke": "Jika sudah mengetahui lokasi terdekat, langsung arahkan ke Satpas SIM terdekat dari lokasi"
+  },
+  {
+    "No": 2,
+    "Jenis Pelayanan": "Perpanjangan SIM (A / C)",
+    "Input": "Satpas SIM terdekat",
+    "Arahkan ke": "Jika sudah mengetahui lokasi terdekat, langsung arahkan ke Satpas SIM terdekat dari lokasi"
+  },
+  {
+    "No": 3,
+    "Jenis Pelayanan": "Pembayaran Pajak Kendaraan Tahunan",
+    "Input": "Samsat terdekat",
+    "Arahkan ke": "Jika sudah mengetahui lokasi terdekat, langsung arahkan ke Samsat terdekat dari lokasi"
+  },
+  {
+    "No": 4,
+    "Jenis Pelayanan": "Pengesahan STNK 5 Tahunan",
+    "Input": "Samsat terdekat",
+    "Arahkan ke": "Jika sudah mengetahui lokasi terdekat, langsung arahkan ke Samsat terdekat dari lokasi"
+  },
+  {
+    "No": 5,
+    "Jenis Pelayanan": "Balik Nama Kendaraan",
+    "Input": "Samsat terdekat",
+    "Arahkan ke": "Jika sudah mengetahui lokasi terdekat, langsung arahkan ke Samsat terdekat dari lokasi"
+  },
+  {
+    "No": 6,
+    "Jenis Pelayanan": "Cek Tilang / ETLE",
+    "Input": "API eksternal",
+    "Arahkan ke": "Jika layanan online, langsung arahkan ke API ETLE eksternal, arahkan ke https://play.google.com/store/apps/details?id=id.qoin.korlantas.user&hl=id"
+  },
+  {
+    "No": 7,
+    "Jenis Pelayanan": "SIM Hilang / Rusak",
+    "Input": "Satpas SIM terdekat",
+    "Arahkan ke": "Jika sudah mengetahui lokasi terdekat, langsung arahkan ke Satpas SIM terdekat dari lokasi"
+  },
+  {
+    "No": 8,
+    "Jenis Pelayanan": "SIM Internasional",
+    "Input": "Layanan SIM Internasional",
+    "Arahkan ke": "Jika sudah mengetahui lokasi terdekat, langsung arahkan ke layanan SIM Internasional"
+  },
+  {
+    "No": 9,
+    "Jenis Pelayanan": "Mutasi Kendaraan",
+    "Input": "Samsat terdekat",
+    "Arahkan ke": "Jika sudah mengetahui lokasi terdekat, langsung arahkan ke Samsat terdekat dari lokasi"
+  },
+  {
+    "No": 10,
+    "Jenis Pelayanan": "Ganti Data STNK",
+    "Input": "Samsat terdekat",
+    "Arahkan ke": "Jika sudah mengetahui lokasi terdekat, langsung arahkan ke Samsat terdekat dari lokasi"
+  },
+  {
+    "No": 11,
+    "Jenis Pelayanan": "Laporan Kehilangan STNK",
+    "Input": "Kantor Polisi terdekat",
+    "Arahkan ke": "Jika sudah mengetahui lokasi terdekat, langsung arahkan ke kantor polisi terdekat dari lokasi"
+  },
+  {
+    "No": 12,
+    "Jenis Pelayanan": "Klarifikasi Pajak Progresif",
+    "Input": "Samsat terdekat",
+    "Arahkan ke": "Jika sudah mengetahui lokasi terdekat, langsung arahkan ke Samsat terdekat dari lokasi"
+  },
+  {
+    "No": 13,
+    "Jenis Pelayanan": "Blokir Kendaraan Lama",
+    "Input": "Samsat terdekat",
+    "Arahkan ke": "Jika sudah mengetahui lokasi terdekat, langsung arahkan ke Samsat terdekat dari lokasi"
+  },
+  {
+    "No": 14,
+    "Jenis Pelayanan": "Pelaporan Kendaraan Hilang",
+    "Input": "Kantor Polisi terdekat",
+    "Arahkan ke": "Jika sudah mengetahui lokasi terdekat, langsung arahkan ke kantor polisi terdekat dari lokasi"
+  },
+  {
+    "No": 15,
+    "Jenis Pelayanan": "Cek Status SIM / STNK",
+    "Input": "API eksternal",
+    "Arahkan ke": "Jika layanan online, langsung arahkan ke API status SIM/STNK eksternal, arahkan ke https://play.google.com/store/apps/details?id=id.qoin.korlantas.user&hl=id"
+  }
+]

@@ -13,10 +13,11 @@ import (
 )
 
 type OpenAIService struct {
-	client *openai.Client
+	client       *openai.Client
+	rulesService *RulesService
 }
 
-func NewOpenAIService() *OpenAIService {
+func NewOpenAIService(rulesService *RulesService) *OpenAIService {
 	client := openai.NewClient(
 		option.WithAPIKey(config.AppConfig.OpenAIAPIKey),
 	)
@@ -24,7 +25,8 @@ func NewOpenAIService() *OpenAIService {
 	log.Println("✅ OpenAI Service initialized")
 
 	return &OpenAIService{
-		client: &client,
+		client:       &client,
+		rulesService: rulesService,
 	}
 }
 
@@ -164,12 +166,33 @@ DETAIL PELANGGARAN:
 📄 DOKUMEN YANG PERLU DISIAPKAN:
 `, flow.Title, flow.FlowID)
 
+		// Get rules for this service type from rules service
+		var responseRule *ResponseRule
+		var locationRule *LocationRule
+		if s.rulesService != nil {
+			responseRule = s.rulesService.GetResponseRule(flow.Title)
+			locationRule = s.rulesService.GetLocationRule(flow.Title)
+		}
+
 		for i, dok := range flow.DocumentsNeeded {
 			pelayananInfo += fmt.Sprintf("   %d. %s\n", i+1, dok)
 		}
 
-		// Add conversation script if available
-		if len(flow.Script) > 0 {
+		// Add conversation script from response rules if available
+		if responseRule != nil {
+			userName := context.Name
+			if userName == "" {
+				userName = "Sobat Lantas"
+			}
+			locationContext := context.Location
+			if locationContext == "" {
+				locationContext = "lokasi Anda"
+			}
+
+			formattedRule := s.rulesService.FormatResponseRuleForPrompt(responseRule, userName, locationContext)
+			pelayananInfo += formattedRule
+		} else if len(flow.Script) > 0 {
+			// Fallback to flow script if no response rule found
 			pelayananInfo += "\n💬 ALUR PERCAKAPAN YANG HARUS DIIKUTI:\n"
 			pelayananInfo += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
 			pelayananInfo += "⚠️⚠️⚠️ INSTRUKSI WAJIB - SANGAT PENTING ⚠️⚠️⚠️\n\n"
@@ -211,7 +234,7 @@ DETAIL PELANGGARAN:
 
 			pelayananInfo += "💡 CONTOH PENGGUNAAN:\n"
 			if context.Name != "" {
-				pelayananInfo += fmt.Sprintf("Jika script mengatakan: \"halo <name> sobat lantas\\n<konteks>\"\n")
+				pelayananInfo += "Jika script mengatakan: \"halo <name> sobat lantas\\n<konteks>\"\n"
 				pelayananInfo += fmt.Sprintf("Anda harus jawab: \"halo %s sobat lantas\\nSaya lihat Anda sedang di %s\"\n\n", context.Name, context.Location)
 			} else {
 				pelayananInfo += "Jika script mengatakan: \"halo <name> sobat lantas\\n<konteks>\"\n"
@@ -239,6 +262,12 @@ DETAIL PELANGGARAN:
 - Jelaskan bahwa dokumen akan diverifikasi untuk kelengkapan
 
 `
+		}
+
+		// Add location rule if available
+		if locationRule != nil {
+			formattedLocationRule := s.rulesService.FormatLocationRuleForPrompt(locationRule)
+			pelayananInfo += formattedLocationRule
 		}
 
 		pelayananInfo += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -413,11 +442,11 @@ GAYA KOMUNIKASI:
 
 CONTOH RESPONS YANG BAIK:
 - Pesan PERTAMA: "Halo Sobat Lantas! Demi keselamatan, sebaiknya jangan bonceng dua anak kecil yaa. Bahaya banget loh. Anak-anak harus pakai helm SNI dan cukup satu saja yang dibonceng. Utamakan keselamatan keluarga kita!"
-- Pesan lanjutan: "Wah, kecepatan kamu saat ini %.1f km/jam sudah melebihi batas dalam kota nih. Kurangi kecepatan yaa demi keselamatan!"
+- Pesan lanjutan: "Wah, kecepatan kamu saat ini [kecepatan] km/jam sudah melebihi batas dalam kota nih. Kurangi kecepatan yaa demi keselamatan!"
 - "Kondisi lalu lintas di depan lagi padat nih. Mending ambil rute alternatif biar gak macet."
 - "Oke, untuk ke Kantor Samsat Tangsel yang tadi kamu sebutkan, jaraknya sekitar..."
-- E-Tilang (ada pelanggaran): "Untuk kendaraan dengan nomor polisi %s, ada %d pelanggaran yang tercatat nih. Total dendanya Rp %s. Sebaiknya segera dilunasi yaa biar gak kena denda tambahan."
-- E-Tilang (bersih): "Kabar baik! Untuk kendaraan dengan nomor polisi %s tidak ada tilang yang tercatat. Tetap patuhi peraturan lalu lintas yaa!"
+- E-Tilang (ada pelanggaran): "Untuk kendaraan dengan nomor polisi [nomor], ada [jumlah] pelanggaran yang tercatat nih. Total dendanya Rp [total]. Sebaiknya segera dilunasi yaa biar gak kena denda tambahan."
+- E-Tilang (bersih): "Kabar baik! Untuk kendaraan dengan nomor polisi [nomor] tidak ada tilang yang tercatat. Tetap patuhi peraturan lalu lintas yaa!"
 - Pelayanan (follow-up): "Apakah Anda membutuhkan bantuan untuk proses pembuatan SIM A ini?"
 - Pelayanan (minta upload): "Baik! Untuk melanjutkan proses pembuatan SIM A, silakan upload dokumen-dokumen berikut yaa:
   1. KTP Asli
@@ -500,7 +529,6 @@ Berikan respons yang membantu, relevan, dan sesuai dengan situasi pengguna saat 
 		etilangInfo,
 		pelayananInfo,
 		simFlowContext,
-		context.Speed,
 		userName,
 	)
 }

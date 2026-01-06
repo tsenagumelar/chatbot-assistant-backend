@@ -28,7 +28,8 @@ func main() {
 
 	// Initialize services
 	log.Println("🔧 Initializing services...")
-	openaiService := services.NewOpenAIService()
+	rulesService := services.NewRulesService()
+	openaiService := services.NewOpenAIService(rulesService)
 	orsService := services.NewORSService()
 	etilangService := services.NewETilangService()
 	pelayananService := services.NewPelayananService()

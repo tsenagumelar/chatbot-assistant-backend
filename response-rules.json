@@ -1,0 +1,170 @@
+
+{
+  "Sheet1": [
+    {
+      "No": 1,
+      "Jenis Pelayanan": "Buat SIM Baru (A / C / B /Truk )",
+      "Dokumen yang Perlu Disiapkan": "KTP asli, fotokopi KTP, HP aktif",
+      "pertanyaan 1": "mau bikin sim dong sim A yang cepet gimana",
+      "response 1": "halo <name> sobat lantas\n<konteks>\n\nmau saya bantu carikan lokasi terdekat?\natau berencana online?\n",
+      "pertanyaan 2": "mau dong online bagaimana",
+      "response 2 ": "silakan kamu kunjungi link berikut https://play.google.com/store/apps/details?id=id.qoin.korlantas.user&hl=id \njangan lupa siapkan data foto ktp, dan nomor hp aktif\n\nmau saya bantu buatkan pengajuan pembuatan SIM?",
+      "pertanyaan 3": "mau dibantu buatin aja dong",
+      "response 3": "baik, kalo mau saya buatkan, SIM jenis apa yang kamu butuhkan?\nkirimkan ke saya foto berikut:\n1. ktp"
+    },
+    {
+      "No": 2,
+      "Jenis Pelayanan": "Perpanjangan SIM (A / C)",
+      "Dokumen yang Perlu Disiapkan": "SIM lama, KTP, HP aktif",
+      "pertanyaan 1": "sim saya mau diperpanjang bisa dibantu ga?",
+      "response 1": "halo <name> sobat lantas\nsaya bisa bantu perpanjangan SIM kamu\n\nsebelum lanjut, SIM kamu masih berlaku atau sudah mati?",
+      "pertanyaan 2": "masih berlaku kok",
+      "response 2 ": "baik, perpanjangan SIM bisa dibantu secara online ke link berikut https://play.google.com/store/apps/details?id=id.qoin.korlantas.user&hl=id \nSINAR (SIM Nasional Presisi)\n\nsilakan siapkan dokumen berikut:\n1. foto SIM lama\n2. foto KTP\n3. nomor HP aktif\n\nmau saya bantu buatkan pengajuan perpanjangan SIM?",
+      "pertanyaan 3": "iya dibuatin aja",
+      "response 3": "siap, SIM apa yang mau diperpanjang?\nSIM A atau SIM C?\n\nsilakan kirim:\n1. foto SIM lama\n2. foto KTP"
+    },
+    {
+      "No": 3,
+      "Jenis Pelayanan": "Pembayaran Pajak Kendaraan Tahunan",
+      "Dokumen yang Perlu Disiapkan": "STNK, KTP pemilik, HP",
+      "pertanyaan 1": "mau bayar pajak kendaraan tahunan bisa dibantu ga ya?",
+      "response 1": "halo <name> sobat lantas\nsaya bisa bantu informasi pembayaran pajak kendaraan tahunan kamu\n\nboleh diinformasikan, pajak kendaraan kamu masih aktif atau sedang menunggak?",
+      "pertanyaan 2": "masih aktif kok",
+      "response 2 ": "baik, pembayaran pajak kendaraan tahunan dapat dilakukan melalui aplikasi resmi Samsat Digital (SIGNAL)\natau dengan datang langsung ke Samsat terdekat\n\njika kamu ingin, saya juga bisa bantu menyiapkan dan memproses pengajuan pembayaran melalui sistem kami\n\nsilakan siapkan:\n1. foto STNK\n2. foto KTP pemilik kendaraan\n3. nomor HP aktif\n\nmau saya bantu proseskan sekarang?",
+      "pertanyaan 3": "nunggak sekitar 3 bulan",
+      "response 3": "baik, untuk pajak kendaraan yang menunggak masih dapat dibayarkan\n\nsebagai gambaran, denda keterlambatan pajak kendaraan umumnya sekitar:\n- ±2% per bulan dari pokok pajak\n\nnominal pastinya akan dihitung oleh sistem Samsat sesuai data kendaraan\n\npembayaran dapat dilakukan melalui aplikasi SIGNAL atau Samsat terdekat\n\njika kamu mau, saya juga bisa bantu proseskan pengajuan pembayaran dan pengecekan estimasi pajaknya\n\napakah mau dilanjutkan dibantu?"
+    },
+    {
+      "No": 4,
+      "Jenis Pelayanan": "Pengesahan STNK 5 Tahunan",
+      "Dokumen yang Perlu Disiapkan": "STNK, BPKB, KTP pemilik, kendaraan",
+      "pertanyaan 1": "mau pengesahan STNK 5 tahunan tolong dong dibantu?",
+      "response 1": "halo <name> sobat lantas\nsaya bisa bantu informasi dan proses pengesahan STNK 5 tahunan\n\nboleh diinformasikan, pajak kendaraan kamu masih aktif atau sedang menunggak?",
+      "pertanyaan 2": "masih aktif kok",
+      "response 2 ": "baik, pengesahan STNK 5 tahunan dilakukan melalui Samsat dan memerlukan cek fisik kendaraan\n\nsebagai informasi, layanan SIGNAL (Samsat Digital Nasional) digunakan untuk informasi dan persiapan data, sedangkan proses pengesahan STNK 5 tahunan tetap dilanjutkan di Samsat\n\nsilakan siapkan:\n1. STNK asli\n2. BPKB asli\n3. KTP pemilik kendaraan\n4. kendaraan untuk cek fisik\n\njika kamu ingin, saya juga bisa bantu menyiapkan pengajuan dan data pendukung sebelum ke Samsat\n\nmau saya bantu proseskan sekarang?",
+      "pertanyaan 3": "nunggak sekitar 6 bulan",
+      "response 3": "baik, pengesahan STNK 5 tahunan untuk kendaraan yang terlambat bayar tetap dapat diproses melalui Samsat\n\nsebagai estimasi, denda keterlambatan dihitung dari:\n- PKB (Pajak Kendaraan Bermotor) per tahun\n- SWDKLLJ (Sumbangan Wajib Dana Kecelakaan Lalu Lintas Jalan)\n\nperkiraan perhitungan denda:\n- denda PKB sebesar 25% dari nilai PKB setahun dikalikan jumlah bulan keterlambatan\n- ditambah denda SWDKLLJ, dengan besaran berbeda tergantung jenis kendaraan\n\ntotal denda dapat menjadi signifikan tergantung lama keterlambatan\n\nnominal akhir akan dihitung oleh sistem Samsat saat proses berlangsung\n\napakah ingin dilanjutkan?"
+    },
+    {
+      "No": 5,
+      "Jenis Pelayanan": "Balik Nama Kendaraan",
+      "Dokumen yang Perlu Disiapkan": "KTP pemilik baru, KTP pemilik lama, STNK, BPKB, kwitansi jual beli",
+      "pertanyaan 1": "mau balik nama kendaraan bisa dibantu ga ya?",
+      "response 1": "mau balik nama kendaraan bisa dibantu ga ya?",
+      "pertanyaan 2": "iya betul",
+      "response 2 ": "baik, balik nama kendaraan bermotor adalah proses pengalihan kepemilikan kendaraan ke nama pemilik baru dengan mengurus dokumen di Samsat\n\nproses ini meliputi:\n- cek fisik kendaraan\n- pembayaran pajak dan biaya administrasi\n- penerbitan STNK dan BPKB baru atas nama pemilik baru\n\ntujuannya agar kendaraan sah secara hukum atas nama kamu dan mempermudah administrasi ke depannya",
+      "pertanyaan 3": "dokumen apa aja yang perlu disiapkan?",
+      "response 3": "dokumen wajib untuk balik nama kendaraan meliputi:\n1. KTP pemilik baru\n2. KTP pemilik lama\n3. STNK asli\n4. BPKB asli\n5. kuitansi jual beli bermeterai\n\njika kamu mau, saya bisa bantu cek kelengkapan data dan menyiapkan pengajuan"
+    },
+    {
+      "No": 6,
+      "Jenis Pelayanan": "Cek Tilang / ETLE",
+      "Dokumen yang Perlu Disiapkan": "NOPOL, HP",
+      "pertanyaan 1": "mau cek tilang atau ETLE bisa dibantu?",
+      "response 1": "halo <name> sobat lantas\nsaya bisa bantu cek status tilang atau ETLE kendaraan kamu\n\nsilakan masukkan nomor polisi (NOPOL)",
+      "pertanyaan 2": "B9999AAA",
+      "response 2 ": "status ETLE untuk NOPOL B9999AAA:\n\nTIDAK DITEMUKAN PELANGGARAN AKTIF",
+      "pertanyaan 3": "B1234XYZ",
+      "response 3": "status ETLE untuk NOPOL B1234XYZ:\n\nTERDAPAT PELANGGARAN\n\ndetail pelanggaran:\n- jenis: tidak menggunakan sabuk pengaman\n- waktu & lokasi: 12 Jan 2026 – Jl. Sudirman\n- status: belum dibayar"
+    },
+    {
+      "No": 7,
+      "Jenis Pelayanan": "SIM Hilang / Rusak",
+      "Dokumen yang Perlu Disiapkan": "KTP, surat kehilangan",
+      "pertanyaan 1": "sim saya hilang atau rusak bisa dibantu?",
+      "response 1": "halo <name> sobat lantas\nsaya bisa bantu pengurusan SIM hilang atau rusak\n\nboleh diinformasikan, SIM kamu hilang atau rusak?",
+      "pertanyaan 2": "hilang",
+      "response 2 ": "baik, pengurusan SIM hilang dapat dibuat di satpas terdekat\n\nsilakan siapkan:\n1. KTP\n2. surat kehilangan dari kepolisian\n\nmau saya bantu buatkan pengajuannya?",
+      "pertanyaan 3": "iya dibuatin aja",
+      "response 3": "siap, SIM apa yang hilang?\nSIM A atau SIM C?\n\nsilakan kirim:\n1. foto KTP\n2. foto surat kehilangan"
+    },
+    {
+      "No": 8,
+      "Jenis Pelayanan": "SIM Internasional",
+      "Dokumen yang Perlu Disiapkan": "SIM nasional, paspor, foto",
+      "pertanyaan 1": "mau bikin SIM internasional bisa dibantu ga?",
+      "response 1": "halo <name> sobat lantas\nsaya bisa bantu pengurusan SIM Internasional\n\napakah kamu sudah memiliki SIM nasional yang masih berlaku?",
+      "pertanyaan 2": "sudah",
+      "response 2 ": "baik, pembuatan SIM Internasional dapat dibantu\n\nsilakan siapkan dokumen berikut:\n1. SIM nasional yang masih berlaku\n2. paspor\n3. foto terbaru\n\nmau saya bantu buatkan pengajuannya?",
+      "pertanyaan 3": "iya dibuatin aja",
+      "response 3": "siap, SIM nasional apa yang kamu miliki?\nSIM A atau SIM C?\n\nsilakan kirim:\n1. foto SIM nasional\n2. foto paspor\n3. foto diri"
+    },
+    {
+      "No": 9,
+      "Jenis Pelayanan": "Mutasi Kendaraan",
+      "Dokumen yang Perlu Disiapkan": "STNK, BPKB, KTP pemilik",
+      "pertanyaan 1": "saya mau mutasi kendaraan",
+      "response 1": "halo <name> sobat lantasmutasi kendaraan dapat dilakukan di Samsat sesuai domisili kendaraanjika kamu mau, saya juga bisa bantu menyiapkan dan memproses pengajuan mutasi kendaraan kamumutasi yang kamu maksud keluar daerah atau masuk daerah?",
+      "pertanyaan 2": "mutasi keluar daerah",
+      "response 2 ": "baik, mutasi keluar daerah dapat diprosessilakan siapkan dokumen berikut:\n1. STNK asli\n2. BPKB asli\n3. KTP pemilik kendaraan\nmau saya bantu buatkan pengajuannya?",
+      "pertanyaan 3": "iya dibuatin aja",
+      "response 3": "siap, silakan kirim data berikut:\n1. NOPOL kendaraan\n2. foto STNK\n3. foto BPKB\n4. foto KTP pemilik"
+    },
+    {
+      "No": 10,
+      "Jenis Pelayanan": "Ganti Data STNK",
+      "Dokumen yang Perlu Disiapkan": "STNK, KTP, dokumen pendukung",
+      "pertanyaan 1": "saya mau ganti data STNK",
+      "response 1": "halo <name> sobat lantasperubahan data STNK dapat dilakukan di Samsat terdekatjika kamu mau, saya juga bisa bantu menyiapkan dan memproses pengajuan ganti data STNK kamudata apa yang ingin kamu ubah?",
+      "pertanyaan 2": "alamat pemilik",
+      "response 2 ": "baik, perubahan data alamat dapat diprosessilakan siapkan dokumen berikut:\n1. STNK asli\n2. KTP sesuai alamat baru\n3. dokumen pendukung \nperubahan datamau saya bantu buatkan pengajuannya?",
+      "pertanyaan 3": "iya dibuatin aja",
+      "response 3": "siap, silakan kirim data berikut:\n1. NOPOL kendaraan\n2. foto STNK\n3. foto KTP\n4. foto dokumen pendukung"
+    },
+    {
+      "No": 11,
+      "Jenis Pelayanan": "Laporan Kehilangan STNK",
+      "Dokumen yang Perlu Disiapkan": "KTP, surat kehilangan",
+      "pertanyaan 1": "STNK saya hilang",
+      "response 1": "halo <name> sobat lantaslaporan dan pengurusan STNK hilang dapat dilakukan di Samsat terdekatjika kamu mau, saya juga bisa bantu menyiapkan dan memproses pengajuan STNK hilang kamuapakah kamu sudah memiliki surat kehilangan dari kepolisian?",
+      "pertanyaan 2": "sudah",
+      "response 2 ": "baik, pengurusan STNK hilang dapat dilanjutkansilakan siapkan dokumen berikut:\n1. KTP\n2. surat kehilangan dari kepolisian\nmau saya bantu buatkan pengajuannya?",
+      "pertanyaan 3": "iya dibuatin aja",
+      "response 3": "siap, silakan kirim data berikut:1. NOPOL kendaraan\n2. foto KTP\n3. foto surat kehilangan"
+    },
+    {
+      "No": 12,
+      "Jenis Pelayanan": "Klarifikasi Pajak Progresif",
+      "Dokumen yang Perlu Disiapkan": "KTP, STNK, dokumen kendaraan lain",
+      "pertanyaan 1": "saya mau klarifikasi pajak progresif",
+      "response 1": "halo <name> sobat lantasklarifikasi pajak progresif dapat dilakukan di Samsat terdekatjika kamu mau, saya juga bisa bantu menyiapkan dan memproses pengajuan klarifikasi pajak progresif kamuapakah kendaraan yang terkena pajak progresif masih kamu miliki?",
+      "pertanyaan 2": "tidak",
+      "response 2 ": "baik, klarifikasi pajak progresif dapat diprosessilakan siapkan dokumen berikut:\n1. KTP\n2. STNK kendaraan\n3. dokumen pendukung (bukti jual/blokir kendaraan lain)\nmau saya bantu buatkan pengajuannya?",
+      "pertanyaan 3": "iya dibuatin aja",
+      "response 3": "siap, silakan kirim data berikut:1. NOPOL kendaraan2. foto KTP3. foto STNK4. foto dokumen pendukung"
+    },
+    {
+      "No": 13,
+      "Jenis Pelayanan": "Blokir Kendaraan Lama",
+      "Dokumen yang Perlu Disiapkan": "KTP, STNK lama atau bukti jual kendaraan",
+      "pertanyaan 1": "saya mau blokir kendaraan lama",
+      "response 1": "saya mau blokir kendaraan lama",
+      "pertanyaan 2": "sudah dijual",
+      "response 2 ": "baik, pemblokiran kendaraan lama dapat diprosessilakan siapkan dokumen berikut:\n1. KTP\n2. STNK lama atau bukti jual kendaraan\nmau saya bantu buatkan pengajuannya?",
+      "pertanyaan 3": "iya dibuatin aja",
+      "response 3": "siap, silakan kirim data berikut:\n1. NOPOL kendaraan\n2. foto KTP\n3. foto STNK lama atau bukti jual"
+    },
+    {
+      "No": 14,
+      "Jenis Pelayanan": "Pelaporan Kendaraan Hilang",
+      "Dokumen yang Perlu Disiapkan": "KTP, STNK, BPKB, surat kehilangan",
+      "pertanyaan 1": "KTP, STNK, BPKB, surat kehilangan",
+      "response 1": "halo <name> sobat lantaspelaporan kendaraan hilang wajib diawali dengan laporan ke kantor polisi untuk mendapatkan Surat Keterangan Tanda Lapor Kehilangan (SKTLK)pelaporan ini tidak dipungut biaya (gratis)setelah itu, proses lanjutan dapat dilakukan di Samsat terdekatjika kamu mau, saya juga bisa bantu menyiapkan proses pelaporannya",
+      "pertanyaan 2": "sudah lapor polisi",
+      "response 2 ": "baik, jika sudah memiliki SKTLK, pelaporan kendaraan hilang dapat dilanjutkansilakan siapkan dokumen berikut:\n1. KTP\n2. STNK\n3. BPKB\n4. SKTLK dari kepolisian\nmau saya bantu buatkan pengajuannya?",
+      "pertanyaan 3": "iya dibuatin aja",
+      "response 3": "siap, silakan kirim data berikut:\n1. NOPOL kendaraan\n2. foto KTP\n3. foto STNK\n4. foto BPKB\n5. foto SKTLK"
+    },
+    {
+      "No": 15,
+      "Jenis Pelayanan": "Cek Status SIM / STNK",
+      "Dokumen yang Perlu Disiapkan": "Nomor SIM atau NOPOL, HP",
+      "pertanyaan 1": "saya mau cek status SIM atau STNK",
+      "response 1": "halo <name> sobat lantaspengecekan status SIM atau STNK dapat dilakukan secara onlinejika kamu mau, saya juga bisa bantu cek status SIM atau STNK kamu sekarangyang ingin dicek SIM atau STNK?",
+      "pertanyaan 2": "SIM",
+      "response 2 ": "baik, silakan masukkan nomor SIM yang ingin kamu cek statusnya",
+      "pertanyaan 3": "1222O32",
+      "response 3": "hasil pengecekan \nstatus SIM:MASIH BERLAKU\nmasa berlaku: 12 Jan 2027"
+    }
+  ]
+}
