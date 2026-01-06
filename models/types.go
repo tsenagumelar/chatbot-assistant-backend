@@ -9,11 +9,12 @@ type ChatRequest struct {
 }
 
 type Context struct {
-	Location  string  `json:"location"`
-	Speed     float64 `json:"speed"`
-	Traffic   string  `json:"traffic"`
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
+	Location    string       `json:"location"`
+	Speed       float64      `json:"speed"`
+	Traffic     string       `json:"traffic"`
+	Latitude    float64      `json:"latitude"`
+	Longitude   float64      `json:"longitude"`
+	ETilangInfo *ETilangInfo `json:"e_tilang_info,omitempty"` // Info tilang jika dicek
 }
 
 type ChatResponse struct {
@@ -86,4 +87,24 @@ type OpenAIResponse struct {
 		CompletionTokens int `json:"completion_tokens"`
 		TotalTokens      int `json:"total_tokens"`
 	} `json:"usage"`
+}
+
+// E-Tilang structures
+type ETilangViolation struct {
+	Date        string `json:"date"`
+	Violation   string `json:"violation"`
+	Location    string `json:"location"`
+	Fine        int    `json:"fine"`
+	OfficerName string `json:"officer_name"`
+	Status      string `json:"status"` // "unpaid", "paid", "processed"
+}
+
+type ETilangInfo struct {
+	PlateNumber   string             `json:"plate_number"`
+	ChassisNumber string             `json:"chassis_number"`
+	OwnerName     string             `json:"owner_name"`
+	VehicleType   string             `json:"vehicle_type"`
+	HasViolation  bool               `json:"has_violation"`
+	Violations    []ETilangViolation `json:"violations,omitempty"`
+	TotalFine     int                `json:"total_fine"`
 }

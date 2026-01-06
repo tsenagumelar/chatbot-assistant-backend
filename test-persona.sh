@@ -94,3 +94,89 @@ echo ""
 echo "═══════════════════════════════════════════════════"
 echo "✅ TESTING SELESAI"
 echo "═══════════════════════════════════════════════════"
+
+# 5. TEST E-TILANG - Ada Pelanggaran
+echo ""
+echo "═══════════════════════════════════════════════════"
+echo "🎫 TESTING E-TILANG FEATURE"
+echo "═══════════════════════════════════════════════════"
+echo ""
+echo "📝 Test 5: Cek E-Tilang dengan pelanggaran (B1234SV)"
+echo "───────────────────────────────────────────────────"
+curl -s -X POST http://localhost:8080/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Tolong bantu cek tilang dengan no polisi B1234SV",
+    "context": {
+      "location": "Jakarta",
+      "speed": 30.0,
+      "traffic": "lancar",
+      "latitude": -6.2088,
+      "longitude": 106.8456
+    }
+  }' | jq '.'
+
+echo ""
+sleep 2
+
+# 6. TEST E-TILANG - Tidak Ada Pelanggaran
+echo "───────────────────────────────────────────────────"
+echo "📝 Test 6: Cek E-Tilang bersih (B9999ZZ)"
+echo "───────────────────────────────────────────────────"
+curl -s -X POST http://localhost:8080/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Cek tilang motor saya nomor polisi B 9999 ZZ",
+    "context": {
+      "location": "Bandung",
+      "speed": 40.0,
+      "traffic": "lancar",
+      "latitude": -6.9175,
+      "longitude": 107.6191
+    }
+  }' | jq '.'
+
+echo ""
+sleep 2
+
+# 7. TEST E-TILANG - Plat Lain dengan Pelanggaran
+echo "───────────────────────────────────────────────────"
+echo "📝 Test 7: Cek E-Tilang dengan pelanggaran parkir (B5678XY)"
+echo "───────────────────────────────────────────────────"
+curl -s -X POST http://localhost:8080/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Cek denda tilang mobil B5678XY dong",
+    "context": {
+      "location": "Jakarta",
+      "speed": 0.0,
+      "traffic": "padat",
+      "latitude": -6.2088,
+      "longitude": 106.8456
+    }
+  }' | jq '.'
+
+echo ""
+sleep 2
+
+# 8. TEST E-TILANG - Plat tidak terdaftar
+echo "───────────────────────────────────────────────────"
+echo "📝 Test 8: Cek E-Tilang plat tidak terdaftar (F1111XX)"
+echo "───────────────────────────────────────────────────"
+curl -s -X POST http://localhost:8080/api/v1/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Bantu cek pelanggaran nomor polisi F1111XX",
+    "context": {
+      "location": "Bogor",
+      "speed": 35.0,
+      "traffic": "lancar",
+      "latitude": -6.5971,
+      "longitude": 106.8060
+    }
+  }' | jq '.'
+
+echo ""
+echo "═══════════════════════════════════════════════════"
+echo "✅ ALL TESTS COMPLETED"
+echo "═══════════════════════════════════════════════════"

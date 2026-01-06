@@ -112,6 +112,53 @@ func (s *OpenAIService) buildSystemPrompt(context models.Context, isFirstMessage
 `
 	}
 
+	// Build E-Tilang info if available
+	etilangInfo := ""
+	if context.ETilangInfo != nil {
+		etilang := context.ETilangInfo
+		etilangInfo = fmt.Sprintf(`
+🚨 DATA E-TILANG YANG DICEK PENGGUNA:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 Nomor Polisi: %s
+🔢 Nomor Rangka: %s
+👤 Nama Pemilik: %s
+🚗 Jenis Kendaraan: %s
+`, etilang.PlateNumber, etilang.ChassisNumber, etilang.OwnerName, etilang.VehicleType)
+
+		if etilang.HasViolation && len(etilang.Violations) > 0 {
+			etilangInfo += fmt.Sprintf(`
+⚠️ STATUS: ADA PELANGGARAN (%d pelanggaran)
+💰 Total Denda: Rp %s
+
+DETAIL PELANGGARAN:
+`, len(etilang.Violations), formatRupiah(etilang.TotalFine))
+
+			for i, v := range etilang.Violations {
+				status := "Belum Dibayar ❌"
+				if v.Status == "paid" {
+					status = "Sudah Dibayar ✅"
+				} else if v.Status == "processed" {
+					status = "Dalam Proses 🔄"
+				}
+
+				etilangInfo += fmt.Sprintf(`
+%d. Tanggal: %s
+   Pelanggaran: %s
+   Lokasi: %s
+   Denda: Rp %s
+   Petugas: %s
+   Status: %s
+`, i+1, v.Date, v.Violation, v.Location, formatRupiah(v.Fine), v.OfficerName, status)
+			}
+		} else {
+			etilangInfo += `
+✅ STATUS: TIDAK ADA PELANGGARAN
+   Kendaraan ini bersih dari tilang elektronik.
+`
+		}
+		etilangInfo += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+	}
+
 	return fmt.Sprintf(`Anda adalah asisten polisi lalu lintas AI bernama "Sobat Lantas" yang membantu pengemudi di Indonesia.
 %s
 KONTEKS PENGGUNA SAAT INI:
@@ -121,6 +168,7 @@ KONTEKS PENGGUNA SAAT INI:
 🚗 Kecepatan: %.1f km/jam
 🚦 Kondisi Traffic: %s
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+%s
 
 PENTING - MANAJEMEN KONTEKS PERCAKAPAN:
 ⚠️ SELALU ingat dan referensikan informasi dari pesan-pesan sebelumnya dalam percakapan ini
@@ -137,6 +185,7 @@ TUGAS ANDA:
 6. 🌧️  Memberikan saran berkendara sesuai kondisi cuaca (jika ditanya)
 7. 🚓 Memberikan informasi tentang prosedur kepolisian lalu lintas
 8. 🧠 Mengingat dan menggunakan konteks dari percakapan sebelumnya
+9. 🎫 Memberikan informasi e-tilang jika pengguna menanyakan atau jika data tersedia di konteks
 
 PERATURAN LALU LINTAS INDONESIA (referensi):
 - Batas kecepatan dalam kota: 50 km/jam
@@ -168,6 +217,14 @@ CONTOH RESPONS YANG BAIK:
 - Pesan lanjutan: "Wah, kecepatan kamu saat ini %.1f km/jam sudah melebihi batas dalam kota nih. Kurangi kecepatan yaa demi keselamatan!"
 - "Kondisi lalu lintas di depan lagi padat nih. Mending ambil rute alternatif biar gak macet."
 - "Oke, untuk ke Kantor Samsat Tangsel yang tadi kamu sebutkan, jaraknya sekitar..."
+- E-Tilang (ada pelanggaran): "Untuk kendaraan dengan nomor polisi %s, ada %d pelanggaran yang tercatat nih. Total dendanya Rp %s. Sebaiknya segera dilunasi yaa biar gak kena denda tambahan."
+- E-Tilang (bersih): "Alhamdulillah, untuk kendaraan dengan nomor polisi %s tidak ada tilang yang tercatat. Tetap patuhi peraturan lalu lintas yaa!"
+
+INSTRUKSI KHUSUS E-TILANG:
+- Jika ada data e-tilang di konteks, sampaikan informasinya dengan jelas dan ramah
+- Untuk pelanggaran yang belum dibayar, ingatkan untuk segera melunasi
+- Berikan apresiasi jika kendaraan bersih dari pelanggaran
+- Gunakan format yang mudah dibaca dengan poin-poin jika ada banyak pelanggaran
 
 Berikan respons yang membantu, relevan, dan sesuai dengan situasi pengguna saat ini.`,
 		greetingInstruction,
@@ -176,6 +233,7 @@ Berikan respons yang membantu, relevan, dan sesuai dengan situasi pengguna saat 
 		context.Longitude,
 		context.Speed,
 		context.Traffic,
+		etilangInfo,
 		context.Speed,
 	)
 }
@@ -208,4 +266,31 @@ func (s *OpenAIService) ChatWithHistory(messages []models.OpenAIMessage) (string
 	}
 
 	return "", errors.New("empty response from OpenAI")
+}
+
+// Helper function to format Rupiah
+func formatRupiah(amount int) string {
+	if amount == 0 {
+		return "0"
+	}
+
+	// Convert to string
+	str := fmt.Sprintf("%d", amount)
+
+	// Add thousand separators
+	n := len(str)
+	if n <= 3 {
+		return str
+	}
+
+	// Build from right to left
+	result := ""
+	for i := 0; i < n; i++ {
+		if i > 0 && (n-i)%3 == 0 {
+			result = "." + result
+		}
+		result = string(str[n-1-i]) + result
+	}
+
+	return result
 }

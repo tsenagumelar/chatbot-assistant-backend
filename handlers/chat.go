@@ -4,19 +4,22 @@ import (
 	"log"
 	"police-assistant-backend/models"
 	"police-assistant-backend/services"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 )
 
 type ChatHandler struct {
-	openaiService *services.OpenAIService
-	orsService    *services.ORSService
+	openaiService  *services.OpenAIService
+	orsService     *services.ORSService
+	etilangService *services.ETilangService
 }
 
-func NewChatHandler(openaiService *services.OpenAIService, orsService *services.ORSService) *ChatHandler {
+func NewChatHandler(openaiService *services.OpenAIService, orsService *services.ORSService, etilangService *services.ETilangService) *ChatHandler {
 	return &ChatHandler{
-		openaiService: openaiService,
-		orsService:    orsService,
+		openaiService:  openaiService,
+		orsService:     orsService,
+		etilangService: etilangService,
 	}
 }
 
@@ -54,6 +57,25 @@ func (h *ChatHandler) HandleChat(c *fiber.Ctx) error {
 	log.Printf("💬 Chat request: %s", req.Message)
 	log.Printf("📍 Context: Location=%s, Speed=%.1f km/h, Traffic=%s",
 		req.Context.Location, req.Context.Speed, req.Context.Traffic)
+
+	// Check if user is asking about e-tilang
+	messageLower := strings.ToLower(req.Message)
+	if strings.Contains(messageLower, "tilang") || strings.Contains(messageLower, "pelanggaran") ||
+		strings.Contains(messageLower, "denda") || strings.Contains(messageLower, "cek") && (strings.Contains(messageLower, "polisi") || strings.Contains(messageLower, "nopol")) {
+
+		// Try to extract plate number
+		plateNumber := h.etilangService.ExtractPlateNumber(req.Message)
+		if plateNumber != "" {
+			log.Printf("🚗 E-Tilang check requested for plate: %s", plateNumber)
+
+			// Get e-tilang info
+			etilangInfo := h.etilangService.CheckETilang(plateNumber)
+			req.Context.ETilangInfo = etilangInfo
+
+			log.Printf("📋 E-Tilang info attached: HasViolation=%v, TotalFine=%d",
+				etilangInfo.HasViolation, etilangInfo.TotalFine)
+		}
+	}
 
 	// If location is empty but coordinates are provided, do reverse geocoding
 	if req.Context.Location == "" && req.Context.Latitude != 0 && req.Context.Longitude != 0 {

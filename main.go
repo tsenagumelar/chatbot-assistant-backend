@@ -30,9 +30,10 @@ func main() {
 	log.Println("🔧 Initializing services...")
 	openaiService := services.NewOpenAIService()
 	orsService := services.NewORSService()
+	etilangService := services.NewETilangService()
 
 	// Initialize handlers
-	chatHandler := handlers.NewChatHandler(openaiService, orsService)
+	chatHandler := handlers.NewChatHandler(openaiService, orsService, etilangService)
 	trafficHandler := handlers.NewTrafficHandler(orsService)
 	routeHandler := handlers.NewRouteHandler(orsService)
 	sessionHandler := handlers.NewSessionHandler()
