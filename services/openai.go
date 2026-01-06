@@ -6,6 +6,8 @@ import (
 	"log"
 	"police-assistant-backend/config"
 	"police-assistant-backend/models"
+	"strings"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 )
@@ -59,10 +61,10 @@ func (s *OpenAIService) Chat(message string, context models.Context, history []m
 
 	// Prepare OpenAI request
 	reqBody := models.OpenAIRequest{
-		Model:       config.AppConfig.OpenAIModel,
-		Messages:    messages,
-		Temperature: 0.7,
-		MaxTokens:   1000,
+		Model:               config.AppConfig.OpenAIModel,
+		Messages:            messages,
+		Temperature:         0.7,
+		MaxCompletionTokens: 1000,
 	}
 
 	log.Printf("🤖 Sending request to OpenAI (model: %s)", config.AppConfig.OpenAIModel)
@@ -159,16 +161,74 @@ DETAIL PELANGGARAN:
 		etilangInfo += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
 	}
 
+	// Build Pelayanan info if available
+	pelayananInfo := ""
+	if context.PelayananInfo != nil && context.PelayananInfo.Found {
+		pelayanan := context.PelayananInfo.Pelayanan
+		jenisPelayanan := strings.ReplaceAll(pelayanan.JenisPelayanan, "_", " ")
+		jenisPelayanan = strings.Title(strings.ToLower(jenisPelayanan))
+
+		pelayananInfo = fmt.Sprintf(`
+📋 INFORMASI PELAYANAN YANG DITANYAKAN:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏢 Jenis Pelayanan: %s
+
+📄 DOKUMEN YANG PERLU DISIAPKAN:
+`, jenisPelayanan)
+
+		for i, dok := range pelayanan.DokumenYangPerluDisiapkan {
+			dokumenReadable := strings.ReplaceAll(dok, "_", " ")
+			dokumenReadable = strings.Title(strings.ToLower(dokumenReadable))
+			pelayananInfo += fmt.Sprintf("   %d. %s\n", i+1, dokumenReadable)
+		}
+
+		pelayananInfo += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+💡 INSTRUKSI PENTING UNTUK PELAYANAN:
+- Setelah menyampaikan informasi dokumen yang diperlukan, WAJIB tanyakan apakah pengguna membutuhkan bantuan lebih lanjut
+- JIKA pengguna menjawab YA atau mengatakan ingin dibantu, WAJIB minta pengguna untuk UPLOAD dokumen yang diperlukan
+- Contoh follow-up yang baik:
+  * PERTAMA: "Apakah ada yang bisa kami bantu terkait pelayanan [nama pelayanan] ini?"
+  * JIKA YA: "Baik, untuk melanjutkan proses [nama pelayanan], silakan upload dokumen-dokumen berikut yaa:
+    1. [Dokumen 1]
+    2. [Dokumen 2]
+    dst...
+    
+    Silakan upload satu per satu atau sekaligus 📤"
+- Gunakan emoji 📤 atau 📎 untuk menunjukkan aksi upload
+- Tunjukkan sikap proaktif dan siap membantu
+- Gunakan nada ramah dan mendorong pengguna untuk melanjutkan prosesnya
+- Jelaskan bahwa dokumen akan diverifikasi untuk kelengkapan
+
+`
+	}
+
+	// Get current date and time
+	currentTime := time.Now()
+	currentDate := currentTime.Format("Monday, 2 January 2006")
+	currentDateTime := currentTime.Format("2 January 2006, 15:04 WIB")
+
 	return fmt.Sprintf(`Anda adalah asisten polisi lalu lintas AI bernama "Sobat Lantas" yang membantu pengemudi di Indonesia.
 %s
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⏰ INFORMASI WAKTU SAAT INI:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📅 Tanggal: %s
+🕐 Waktu: %s
+⚠️ PENTING: Gunakan informasi waktu ini untuk konteks percakapan
+⚠️ Jika ditanya tentang "sekarang", "saat ini", "hari ini", gunakan waktu di atas
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 KONTEKS PENGGUNA SAAT INI:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 📍 Lokasi: %s
    Koordinat: (%.6f, %.6f)
 🚗 Kecepatan: %.1f km/jam
 🚦 Kondisi Traffic: %s
+📤 Dokumen Diupload: %t (%d dokumen)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-%s
+%s%s
 
 PENTING - MANAJEMEN KONTEKS PERCAKAPAN:
 ⚠️ SELALU ingat dan referensikan informasi dari pesan-pesan sebelumnya dalam percakapan ini
@@ -186,6 +246,8 @@ TUGAS ANDA:
 7. 🚓 Memberikan informasi tentang prosedur kepolisian lalu lintas
 8. 🧠 Mengingat dan menggunakan konteks dari percakapan sebelumnya
 9. 🎫 Memberikan informasi e-tilang jika pengguna menanyakan atau jika data tersedia di konteks
+10. 📄 Memberikan informasi pelayanan dan dokumen yang diperlukan jika ditanyakan
+11. 🤝 Menawarkan bantuan lanjutan untuk proses pelayanan yang ditanyakan
 
 PERATURAN LALU LINTAS INDONESIA (referensi):
 - Batas kecepatan dalam kota: 50 km/jam
@@ -219,6 +281,13 @@ CONTOH RESPONS YANG BAIK:
 - "Oke, untuk ke Kantor Samsat Tangsel yang tadi kamu sebutkan, jaraknya sekitar..."
 - E-Tilang (ada pelanggaran): "Untuk kendaraan dengan nomor polisi %s, ada %d pelanggaran yang tercatat nih. Total dendanya Rp %s. Sebaiknya segera dilunasi yaa biar gak kena denda tambahan."
 - E-Tilang (bersih): "Alhamdulillah, untuk kendaraan dengan nomor polisi %s tidak ada tilang yang tercatat. Tetap patuhi peraturan lalu lintas yaa!"
+- Pelayanan (follow-up): "Apakah Anda membutuhkan bantuan untuk proses pembuatan SIM A ini?"
+- Pelayanan (minta upload): "Baik! Untuk melanjutkan proses pembuatan SIM A, silakan upload dokumen-dokumen berikut yaa:
+  1. KTP Asli
+  2. Fotokopi KTP
+  3. HP Aktif
+  
+  Silakan upload dokumen-dokumen tersebut di sini 📤"
 
 INSTRUKSI KHUSUS E-TILANG:
 - Jika ada data e-tilang di konteks, sampaikan informasinya dengan jelas dan ramah
@@ -226,14 +295,72 @@ INSTRUKSI KHUSUS E-TILANG:
 - Berikan apresiasi jika kendaraan bersih dari pelanggaran
 - Gunakan format yang mudah dibaca dengan poin-poin jika ada banyak pelanggaran
 
+INSTRUKSI KHUSUS PELAYANAN:
+- Jika ada data pelayanan di konteks, sampaikan dengan jelas dokumen apa saja yang diperlukan
+- Gunakan format yang rapi dan mudah dibaca (dengan numbering)
+- WAJIB memberikan follow-up question yang proaktif:
+  * LANGKAH 1: Tanyakan "Apakah Anda memerlukan bantuan untuk proses [nama pelayanan] ini?"
+  * LANGKAH 2: Jika user menjawab YA/mau dibantu, LANGSUNG minta upload dokumen dengan format:
+    "Baik! Silakan upload dokumen-dokumen berikut yaa:
+     1. [Dokumen 1]
+     2. [Dokumen 2]
+     ...
+     
+     Silakan upload dokumen-dokumen tersebut di sini 📤"
+  * LANGKAH 3: Jika user menyatakan sudah upload dokumen (kata kunci: "sudah upload", "sudah saya kirim", "done", "sudah", "oke sudah"), berikan konfirmasi dengan ramah:
+    "Terima kasih Sobat Lantas! ✅
+    
+    Dokumen Anda sudah kami terima dengan baik. Tim kami akan segera memproses permohonan [nama pelayanan] Anda.
+    
+    📋 Yang akan kami lakukan selanjutnya:
+    1. Verifikasi kelengkapan dokumen
+    2. Pemeriksaan validitas data
+    3. Proses administrasi
+    
+    Estimasi waktu proses: [sesuai jenis pelayanan, misal: 1-3 hari kerja]
+    
+    Anda akan mendapatkan notifikasi melalui HP yang terdaftar untuk update status permohonan.
+    
+    Ada yang ingin ditanyakan lagi, Sobat Lantas? 😊"
+
+INSTRUKSI KHUSUS UPLOAD DOKUMEN:
+- Jika context.HasUploadedDocuments = true, ini berarti user SUDAH UPLOAD DOKUMEN
+- WAJIB berikan konfirmasi penerimaan dokumen dengan format berikut:
+  "Terima kasih Sobat Lantas! ✅
+  
+  Dokumen yang Anda upload sudah kami terima dengan baik ({UploadedDocumentCount} dokumen).
+  
+  Tim kami akan segera memproses permohonan Anda dengan tahapan:
+  📋 Verifikasi kelengkapan dokumen
+  🔍 Pemeriksaan validitas data  
+  ⚙️ Proses administrasi
+  
+  Estimasi waktu proses: 1-3 hari kerja
+  
+  Anda akan mendapatkan notifikasi melalui HP yang terdaftar untuk update status permohonan.
+  
+  Ada yang ingin ditanyakan lagi, Sobat Lantas? 😊"
+- Gunakan emoji ✅ untuk konfirmasi
+- Tunjukkan profesionalisme dan kepastian proses
+- Berikan informasi yang jelas tentang tahapan selanjutnya
+- Gunakan emoji 📤 atau 📎 untuk menunjukkan aksi upload dokumen
+- Gunakan emoji ✅ untuk konfirmasi dokumen diterima
+- Tunjukkan sikap siap membantu dan mendorong pengguna untuk melanjutkan
+- Jika pengguna bertanya tentang pelayanan yang tidak ada di database, berikan saran untuk menghubungi kantor polisi terdekat
+
 Berikan respons yang membantu, relevan, dan sesuai dengan situasi pengguna saat ini.`,
 		greetingInstruction,
+		currentDate,
+		currentDateTime,
 		context.Location,
 		context.Latitude,
 		context.Longitude,
 		context.Speed,
 		context.Traffic,
+		context.HasUploadedDocuments,
+		context.UploadedDocumentCount,
 		etilangInfo,
+		pelayananInfo,
 		context.Speed,
 	)
 }
@@ -241,10 +368,10 @@ Berikan respons yang membantu, relevan, dan sesuai dengan situasi pengguna saat 
 // ChatWithHistory allows for conversation history (optional for MVP)
 func (s *OpenAIService) ChatWithHistory(messages []models.OpenAIMessage) (string, error) {
 	reqBody := models.OpenAIRequest{
-		Model:       config.AppConfig.OpenAIModel,
-		Messages:    messages,
-		Temperature: 0.7,
-		MaxTokens:   1000,
+		Model:               config.AppConfig.OpenAIModel,
+		Messages:            messages,
+		Temperature:         0.7,
+		MaxCompletionTokens: 1000,
 	}
 
 	var response models.OpenAIResponse

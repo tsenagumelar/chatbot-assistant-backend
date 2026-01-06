@@ -10,16 +10,18 @@ import (
 )
 
 type ChatHandler struct {
-	openaiService  *services.OpenAIService
-	orsService     *services.ORSService
-	etilangService *services.ETilangService
+	openaiService    *services.OpenAIService
+	orsService       *services.ORSService
+	etilangService   *services.ETilangService
+	pelayananService *services.PelayananService
 }
 
-func NewChatHandler(openaiService *services.OpenAIService, orsService *services.ORSService, etilangService *services.ETilangService) *ChatHandler {
+func NewChatHandler(openaiService *services.OpenAIService, orsService *services.ORSService, etilangService *services.ETilangService, pelayananService *services.PelayananService) *ChatHandler {
 	return &ChatHandler{
-		openaiService:  openaiService,
-		orsService:     orsService,
-		etilangService: etilangService,
+		openaiService:    openaiService,
+		orsService:       orsService,
+		etilangService:   etilangService,
+		pelayananService: pelayananService,
 	}
 }
 
@@ -58,8 +60,45 @@ func (h *ChatHandler) HandleChat(c *fiber.Ctx) error {
 	log.Printf("📍 Context: Location=%s, Speed=%.1f km/h, Traffic=%s",
 		req.Context.Location, req.Context.Speed, req.Context.Traffic)
 
-	// Check if user is asking about e-tilang
+	// Check if user uploaded documents
+	if len(req.Documents) > 0 {
+		req.Context.HasUploadedDocuments = true
+		req.Context.UploadedDocumentCount = len(req.Documents)
+		log.Printf("📤 User uploaded %d document(s)", len(req.Documents))
+
+		// Log document details
+		for i, doc := range req.Documents {
+			log.Printf("   %d. %s (%s) - %s", i+1, doc.FileName, doc.FileType, doc.Description)
+		}
+	}
+
+	// Check if user is asking about pelayanan (services)
 	messageLower := strings.ToLower(req.Message)
+	pelayananKeywords := []string{
+		"pelayanan", "layanan", "sim", "stnk", "pajak", "balik nama", "mutasi",
+		"perpanjang", "buat", "bikin", "ganti", "hilang", "kehilangan",
+		"pengesahan", "dokumen", "syarat", "persyaratan",
+	}
+
+	shouldCheckPelayanan := false
+	for _, keyword := range pelayananKeywords {
+		if strings.Contains(messageLower, keyword) {
+			shouldCheckPelayanan = true
+			break
+		}
+	}
+
+	if shouldCheckPelayanan {
+		log.Printf("📋 Pelayanan check requested")
+		pelayananInfo := h.pelayananService.SearchPelayanan(req.Message)
+		if pelayananInfo.Found {
+			req.Context.PelayananInfo = pelayananInfo
+			log.Printf("✅ Pelayanan info attached: %s", pelayananInfo.Pelayanan.JenisPelayanan)
+		}
+	}
+
+	// Check if user is asking about e-tilang
+	messageLower = strings.ToLower(req.Message)
 	if strings.Contains(messageLower, "tilang") || strings.Contains(messageLower, "pelanggaran") ||
 		strings.Contains(messageLower, "denda") || strings.Contains(messageLower, "cek") && (strings.Contains(messageLower, "polisi") || strings.Contains(messageLower, "nopol")) {
 
@@ -116,8 +155,10 @@ func (h *ChatHandler) HandleChat(c *fiber.Ctx) error {
 	log.Printf("✅ Chat response generated successfully (session: %s)", req.SessionID)
 
 	return c.JSON(models.ChatResponse{
-		Success:   true,
-		Response:  response,
-		SessionID: req.SessionID, // Return session ID ke frontend
+		Success:       true,
+		Response:      response,
+		SessionID:     req.SessionID, // Return session ID ke frontend
+		ETilangInfo:   req.Context.ETilangInfo,
+		PelayananInfo: req.Context.PelayananInfo,
 	})
 }

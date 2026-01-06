@@ -2,26 +2,32 @@ package models
 
 // Request & Response structures for Chat
 type ChatRequest struct {
-	Message   string          `json:"message" validate:"required"`
-	Context   Context         `json:"context"`
-	SessionID string          `json:"session_id,omitempty"` // Session ID untuk backend-managed history
-	History   []OpenAIMessage `json:"history,omitempty"`    // Optional: untuk backward compatibility
+	Message   string             `json:"message" validate:"required"`
+	Context   Context            `json:"context"`
+	SessionID string             `json:"session_id,omitempty"` // Session ID untuk backend-managed history
+	History   []OpenAIMessage    `json:"history,omitempty"`    // Optional: untuk backward compatibility
+	Documents []UploadedDocument `json:"documents,omitempty"`  // Dokumen yang diupload (base64 atau URL)
 }
 
 type Context struct {
-	Location    string       `json:"location"`
-	Speed       float64      `json:"speed"`
-	Traffic     string       `json:"traffic"`
-	Latitude    float64      `json:"latitude"`
-	Longitude   float64      `json:"longitude"`
-	ETilangInfo *ETilangInfo `json:"e_tilang_info,omitempty"` // Info tilang jika dicek
+	Location              string         `json:"location"`
+	Speed                 float64        `json:"speed"`
+	Traffic               string         `json:"traffic"`
+	Latitude              float64        `json:"latitude"`
+	Longitude             float64        `json:"longitude"`
+	ETilangInfo           *ETilangInfo   `json:"e_tilang_info,omitempty"`  // Info tilang jika dicek
+	PelayananInfo         *PelayananInfo `json:"pelayanan_info,omitempty"` // Info pelayanan jika ditanyakan
+	HasUploadedDocuments  bool           `json:"has_uploaded_documents"`   // Flag jika user upload dokumen
+	UploadedDocumentCount int            `json:"uploaded_document_count"`  // Jumlah dokumen yang diupload
 }
 
 type ChatResponse struct {
-	Success   bool   `json:"success"`
-	Response  string `json:"response"`
-	SessionID string `json:"session_id,omitempty"` // Return session ID ke frontend
-	Error     string `json:"error,omitempty"`
+	Success       bool           `json:"success"`
+	Response      string         `json:"response"`
+	SessionID     string         `json:"session_id,omitempty"`     // Return session ID ke frontend
+	ETilangInfo   *ETilangInfo   `json:"e_tilang_info,omitempty"`  // Info tilang jika dicek
+	PelayananInfo *PelayananInfo `json:"pelayanan_info,omitempty"` // Info pelayanan jika ditanyakan
+	Error         string         `json:"error,omitempty"`
 }
 
 // Session structures
@@ -63,10 +69,10 @@ type OpenAIMessage struct {
 }
 
 type OpenAIRequest struct {
-	Model       string          `json:"model"`
-	Messages    []OpenAIMessage `json:"messages"`
-	Temperature float64         `json:"temperature,omitempty"`
-	MaxTokens   int             `json:"max_tokens,omitempty"`
+	Model               string          `json:"model"`
+	Messages            []OpenAIMessage `json:"messages"`
+	Temperature         float64         `json:"temperature,omitempty"`
+	MaxCompletionTokens int             `json:"max_completion_tokens,omitempty"`
 }
 
 type OpenAIResponse struct {
@@ -107,4 +113,27 @@ type ETilangInfo struct {
 	HasViolation  bool               `json:"has_violation"`
 	Violations    []ETilangViolation `json:"violations,omitempty"`
 	TotalFine     int                `json:"total_fine"`
+}
+
+// Pelayanan structures
+type PelayananData struct {
+	No                        int      `json:"no"`
+	JenisPelayanan            string   `json:"jenis_pelayanan"`
+	DokumenYangPerluDisiapkan []string `json:"dokumen_yang_perlu_disiapkan"`
+}
+
+type PelayananInfo struct {
+	Found     bool          `json:"found"`
+	Pelayanan PelayananData `json:"pelayanan,omitempty"`
+	Query     string        `json:"query"`
+}
+
+// Document upload structures
+type UploadedDocument struct {
+	FileName    string `json:"file_name"`
+	FileType    string `json:"file_type"`   // "image/jpeg", "image/png", "application/pdf", etc.
+	Base64Data  string `json:"base64_data"` // Base64 encoded file data
+	URL         string `json:"url"`         // Or URL if file is hosted elsewhere
+	UploadedAt  string `json:"uploaded_at"` // Timestamp
+	Description string `json:"description"` // Optional: "KTP", "Surat Kehilangan", etc.
 }
