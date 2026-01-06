@@ -6,7 +6,6 @@ import (
 	"log"
 	"police-assistant-backend/config"
 	"police-assistant-backend/models"
-	"strings"
 	"time"
 
 	"github.com/openai/openai-go"
@@ -154,32 +153,81 @@ DETAIL PELANGGARAN:
 	// Build Pelayanan info if available
 	pelayananInfo := ""
 	if context.PelayananInfo != nil && context.PelayananInfo.Found {
-		pelayanan := context.PelayananInfo.Pelayanan
-		jenisPelayanan := strings.ReplaceAll(pelayanan.JenisPelayanan, "_", " ")
-		jenisPelayanan = strings.Title(strings.ToLower(jenisPelayanan))
+		flow := context.PelayananInfo.Flow
 
 		pelayananInfo = fmt.Sprintf(`
-📋 INFORMASI PELAYANAN YANG DITANYAKAN:
+📋 ALUR PELAYANAN YANG DITANYAKAN:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🏢 Jenis Pelayanan: %s
+🏢 Layanan: %s
+🆔 Flow ID: %s
 
 📄 DOKUMEN YANG PERLU DISIAPKAN:
-`, jenisPelayanan)
+`, flow.Title, flow.FlowID)
 
-		for i, dok := range pelayanan.DokumenYangPerluDisiapkan {
-			dokumenReadable := strings.ReplaceAll(dok, "_", " ")
-			dokumenReadable = strings.Title(strings.ToLower(dokumenReadable))
-			pelayananInfo += fmt.Sprintf("   %d. %s\n", i+1, dokumenReadable)
+		for i, dok := range flow.DocumentsNeeded {
+			pelayananInfo += fmt.Sprintf("   %d. %s\n", i+1, dok)
 		}
 
-		pelayananInfo += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+		// Add conversation script if available
+		if len(flow.Script) > 0 {
+			pelayananInfo += "\n💬 ALUR PERCAKAPAN YANG HARUS DIIKUTI:\n"
+			pelayananInfo += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+			pelayananInfo += "⚠️⚠️⚠️ INSTRUKSI WAJIB - SANGAT PENTING ⚠️⚠️⚠️\n\n"
+			pelayananInfo += "Anda harus mengikuti ALUR PERCAKAPAN yang sudah ditentukan di bawah ini.\n"
+
+			// Add name replacement instruction
+			if context.Name != "" {
+				pelayananInfo += fmt.Sprintf("⚠️ NAMA PENGGUNA: %s\n", context.Name)
+				pelayananInfo += fmt.Sprintf("⚠️ GANTI semua <name> dengan \"%s\"\n", context.Name)
+			} else {
+				pelayananInfo += "⚠️ Nama pengguna belum diketahui, gunakan \"Sobat Lantas\" untuk menyapa\n"
+			}
+
+			pelayananInfo += "⚠️ GANTI <konteks> dengan informasi lokasi/situasi pengguna saat ini.\n\n"
+
+			// Show script turns
+			for _, turn := range flow.Script {
+				pelayananInfo += fmt.Sprintf("Turn %d:\n", turn.Turn)
+				pelayananInfo += fmt.Sprintf("  User: \"%s\"\n", turn.User)
+				pelayananInfo += fmt.Sprintf("  Anda harus menjawab: \"%s\"\n\n", turn.Assistant)
+			}
+
+			pelayananInfo += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+			pelayananInfo += "📋 ATURAN YANG HARUS DIIKUTI:\n"
+			pelayananInfo += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+			pelayananInfo += "1. ✅ IKUTI alur percakapan di atas sesuai turn/giliran\n"
+
+			if context.Name != "" {
+				pelayananInfo += fmt.Sprintf("2. ✅ GANTI semua <name> dengan \"%s\" (nama pengguna yang sudah diketahui)\n", context.Name)
+			} else {
+				pelayananInfo += "2. ✅ GANTI <name> dengan \"Sobat Lantas\" karena nama belum diketahui\n"
+			}
+
+			pelayananInfo += "3. ✅ GANTI <konteks> dengan informasi lokasi/situasi saat ini\n"
+			pelayananInfo += "4. ✅ JIKA user upload dokumen, konfirmasi dengan cek ✅ dan lanjut ke turn berikutnya\n"
+			pelayananInfo += "5. ✅ Gunakan bahasa yang ramah, natural, tapi tetap ikuti alur\n"
+			pelayananInfo += "6. ✅ JANGAN skip turn, ikuti urutan yang sudah ditentukan\n"
+			pelayananInfo += "7. ✅ Track progress user dan sesuaikan dengan turn yang sedang berjalan\n\n"
+
+			pelayananInfo += "💡 CONTOH PENGGUNAAN:\n"
+			if context.Name != "" {
+				pelayananInfo += fmt.Sprintf("Jika script mengatakan: \"halo <name> sobat lantas\\n<konteks>\"\n")
+				pelayananInfo += fmt.Sprintf("Anda harus jawab: \"halo %s sobat lantas\\nSaya lihat Anda sedang di %s\"\n\n", context.Name, context.Location)
+			} else {
+				pelayananInfo += "Jika script mengatakan: \"halo <name> sobat lantas\\n<konteks>\"\n"
+				pelayananInfo += fmt.Sprintf("Anda harus jawab: \"halo Sobat Lantas\\nSaya lihat Anda sedang di %s\"\n\n", context.Location)
+			}
+		} else {
+			// No script, use general instructions
+			pelayananInfo += `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 💡 INSTRUKSI PENTING UNTUK PELAYANAN:
 - Setelah menyampaikan informasi dokumen yang diperlukan, WAJIB tanyakan apakah pengguna membutuhkan bantuan lebih lanjut
 - JIKA pengguna menjawab YA atau mengatakan ingin dibantu, WAJIB minta pengguna untuk UPLOAD dokumen yang diperlukan
 - Contoh follow-up yang baik:
-  * PERTAMA: "Apakah ada yang bisa kami bantu terkait pelayanan [nama pelayanan] ini?"
-  * JIKA YA: "Baik, untuk melanjutkan proses [nama pelayanan], silakan upload dokumen-dokumen berikut yaa:
+  * PERTAMA: "Apakah ada yang bisa kami bantu terkait pelayanan ini?"
+  * JIKA YA: "Baik, untuk melanjutkan proses, silakan upload dokumen-dokumen berikut yaa:
     1. [Dokumen 1]
     2. [Dokumen 2]
     dst...
@@ -191,6 +239,9 @@ DETAIL PELANGGARAN:
 - Jelaskan bahwa dokumen akan diverifikasi untuk kelengkapan
 
 `
+		}
+
+		pelayananInfo += "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
 	}
 
 	// Build SIM Flow context if active
@@ -253,6 +304,14 @@ Silakan upload dokumen yang diminta yaa 📤"
 	currentDate := currentTime.Format("Monday, 2 January 2006")
 	currentDateTime := currentTime.Format("2 January 2006, 15:04 WIB")
 
+	// Build user info
+	userName := "Sobat Lantas"
+	userNameContext := ""
+	if context.Name != "" {
+		userName = context.Name
+		userNameContext = fmt.Sprintf("👤 Nama Pengguna: %s\n", context.Name)
+	}
+
 	return fmt.Sprintf(`Anda adalah asisten polisi lalu lintas AI bernama "Sobat Lantas" yang membantu pengemudi di Indonesia.
 %s
 
@@ -267,7 +326,7 @@ Silakan upload dokumen yang diminta yaa 📤"
 
 KONTEKS PENGGUNA SAAT INI:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📍 Lokasi: %s
+%s📍 Lokasi: %s
    Koordinat: (%.6f, %.6f)
 🚗 Kecepatan: %.1f km/jam
 🚦 Kondisi Traffic: %s
@@ -280,6 +339,7 @@ PENTING - MANAJEMEN KONTEKS PERCAKAPAN:
 ⚠️ Jika pengguna sudah menyebutkan tujuan, lokasi, atau informasi lainnya sebelumnya, GUNAKAN informasi tersebut
 ⚠️ JANGAN minta informasi yang sama berulang kali - lihat history percakapan terlebih dahulu
 ⚠️ Jika pengguna bertanya "berapa jaraknya?" atau "berapa lama?", cari dulu tujuan yang disebutkan di pesan sebelumnya
+⚠️ JIKA nama pengguna diketahui (%s), gunakan nama tersebut untuk menyapa dengan lebih personal
 
 TUGAS ANDA:
 1. 🛣️  Memberikan informasi lalu lintas yang akurat dan real-time
@@ -353,7 +413,7 @@ CONTOH RESPONS YANG BAIK:
 - "Kondisi lalu lintas di depan lagi padat nih. Mending ambil rute alternatif biar gak macet."
 - "Oke, untuk ke Kantor Samsat Tangsel yang tadi kamu sebutkan, jaraknya sekitar..."
 - E-Tilang (ada pelanggaran): "Untuk kendaraan dengan nomor polisi %s, ada %d pelanggaran yang tercatat nih. Total dendanya Rp %s. Sebaiknya segera dilunasi yaa biar gak kena denda tambahan."
-- E-Tilang (bersih): "Alhamdulillah, untuk kendaraan dengan nomor polisi %s tidak ada tilang yang tercatat. Tetap patuhi peraturan lalu lintas yaa!"
+- E-Tilang (bersih): "Kabar baik! Untuk kendaraan dengan nomor polisi %s tidak ada tilang yang tercatat. Tetap patuhi peraturan lalu lintas yaa!"
 - Pelayanan (follow-up): "Apakah Anda membutuhkan bantuan untuk proses pembuatan SIM A ini?"
 - Pelayanan (minta upload): "Baik! Untuk melanjutkan proses pembuatan SIM A, silakan upload dokumen-dokumen berikut yaa:
   1. KTP Asli
@@ -425,6 +485,7 @@ Berikan respons yang membantu, relevan, dan sesuai dengan situasi pengguna saat 
 		greetingInstruction,
 		currentDate,
 		currentDateTime,
+		userNameContext,
 		context.Location,
 		context.Latitude,
 		context.Longitude,
@@ -436,6 +497,7 @@ Berikan respons yang membantu, relevan, dan sesuai dengan situasi pengguna saat 
 		pelayananInfo,
 		simFlowContext,
 		context.Speed,
+		userName,
 	)
 }
 

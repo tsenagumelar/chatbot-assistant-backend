@@ -3,10 +3,11 @@
 ## 1. Chat Biasa (Tanpa Dokumen)
 
 ```bash
-curl -X POST http://localhost:3000/api/chat \
+curl -X POST http://localhost:8080/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "message": "Saya mau tanya tentang pembuatan SIM C",
+    "name": "Taufan",
     "context": {
       "location": "Jakarta Selatan",
       "latitude": -6.2608,
@@ -20,10 +21,11 @@ curl -X POST http://localhost:3000/api/chat \
 ## 2. Upload 1 Dokumen
 
 ```bash
-curl -X POST http://localhost:3000/api/chat \
+curl -X POST http://localhost:8080/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "message": "Ini KTP saya untuk pengajuan SIM",
+    "name": "Taufan",
     "context": {
       "location": "Jakarta Selatan",
       "latitude": -6.2608,
@@ -43,7 +45,7 @@ curl -X POST http://localhost:3000/api/chat \
 ## 3. Upload Multiple Dokumen Sekaligus
 
 ```bash
-curl -X POST http://localhost:3000/api/chat \
+curl -X POST http://localhost:8080/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "message": "Ini semua dokumen saya untuk perpanjang SIM",
@@ -76,7 +78,7 @@ curl -X POST http://localhost:3000/api/chat \
 ## 4. Upload dengan Session ID (Lanjutan Percakapan)
 
 ```bash
-curl -X POST http://localhost:3000/api/chat \
+curl -X POST http://localhost:8080/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "message": "Ini dokumen tambahannya",
@@ -98,7 +100,7 @@ curl -X POST http://localhost:3000/api/chat \
 ## 5. Upload Berbagai Jenis File (JPG, PNG, PDF)
 
 ```bash
-curl -X POST http://localhost:3000/api/chat \
+curl -X POST http://localhost:8080/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{
     "message": "Saya upload dokumen untuk SKCK",
@@ -134,6 +136,7 @@ curl -X POST http://localhost:3000/api/chat \
 ```json
 {
   "message": "string (required)",
+  "name": "string (optional - nama user untuk personalisasi)",
   "session_id": "string (optional)",
   "context": {
     "location": "string",
@@ -200,12 +203,12 @@ curl -X POST http://localhost:3000/api/chat \
 ### Manual Testing dengan curl
 ```bash
 # 1. Start conversation
-SESSION_ID=$(curl -s -X POST http://localhost:3000/api/chat \
+SESSION_ID=$(curl -s -X POST http://localhost:8080/api/v1/chat \
   -H "Content-Type: application/json" \
   -d '{"message":"Mau perpanjang SIM"}' | jq -r '.session_id')
 
 # 2. Upload document
-curl -X POST http://localhost:3000/api/chat \
+curl -X POST http://localhost:8080/api/v1/chat \
   -H "Content-Type: application/json" \
   -d "{
     \"message\": \"Ini KTP saya\",
@@ -259,7 +262,7 @@ const sendChatWithDocument = async (message, files) => {
   );
   
   // Kirim ke chat API
-  const response = await fetch('http://localhost:3000/api/chat', {
+  const response = await fetch('http://localhost:8080/api/v1/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -281,7 +284,7 @@ const sendChatWithDocument = async (message, files) => {
 import requests
 
 def chat_with_document(message, documents, session_id=None):
-    url = "http://localhost:3000/api/chat"
+    url = "http://localhost:8080/api/v1/chat"
     
     payload = {
         "message": message,

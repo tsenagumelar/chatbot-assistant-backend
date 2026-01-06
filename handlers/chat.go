@@ -58,6 +58,21 @@ func (h *ChatHandler) HandleChat(c *fiber.Ctx) error {
 		log.Printf("📝 Using existing session: %s", req.SessionID)
 	}
 
+	// Set nama user ke context jika diberikan
+	if req.Name != "" {
+		req.Context.Name = req.Name
+		// Simpan nama di session untuk digunakan di request berikutnya
+		sessionStore.SetData(req.SessionID, "user_name", req.Name)
+		log.Printf("👤 User name: %s", req.Name)
+	} else {
+		// Coba ambil nama dari session jika ada
+		savedName := sessionStore.GetData(req.SessionID, "user_name")
+		if savedName != "" {
+			req.Context.Name = savedName
+			log.Printf("👤 User name from session: %s", savedName)
+		}
+	}
+
 	log.Printf("💬 Chat request: %s", req.Message)
 	log.Printf("📍 Context: Location=%s, Speed=%.1f km/h, Traffic=%s",
 		req.Context.Location, req.Context.Speed, req.Context.Traffic)
@@ -95,7 +110,7 @@ func (h *ChatHandler) HandleChat(c *fiber.Ctx) error {
 		pelayananInfo := h.pelayananService.SearchPelayanan(req.Message)
 		if pelayananInfo.Found {
 			req.Context.PelayananInfo = pelayananInfo
-			log.Printf("✅ Pelayanan info attached: %s", pelayananInfo.Pelayanan.JenisPelayanan)
+			log.Printf("✅ Pelayanan info attached: %s", pelayananInfo.Flow.Title)
 		}
 	}
 

@@ -1,136 +1,340 @@
-[
-  {
-    "no": 1,
-    "jenis_pelayanan": "Buat_SIM_Baru_A_C",
-    "dokumen_yang_perlu_disiapkan": [
-      "KTP_asli",
-      "fotokopi_KTP",
-      "HP_aktif"
-    ]
-  },
-  {
-    "no": 2,
-    "jenis_pelayanan": "Perpanjangan_SIM_A_C",
-    "dokumen_yang_perlu_disiapkan": [
-      "SIM_lama",
-      "KTP",
-      "HP_aktif"
-    ]
-  },
-  {
-    "no": 3,
-    "jenis_pelayanan": "Pembayaran_Pajak_Kendaraan_Tahunan",
-    "dokumen_yang_perlu_disiapkan": [
-      "STNK",
-      "KTP_pemilik",
-      "HP"
-    ]
-  },
-  {
-    "no": 4,
-    "jenis_pelayanan": "Pengesahan_STNK_5_Tahunan",
-    "dokumen_yang_perlu_disiapkan": [
-      "STNK",
-      "BPKB",
-      "KTP_pemilik",
-      "kendaraan"
-    ]
-  },
-  {
-    "no": 5,
-    "jenis_pelayanan": "Balik_Nama_Kendaraan",
-    "dokumen_yang_perlu_disiapkan": [
-      "KTP_pemilik_baru",
-      "KTP_pemilik_lama",
-      "STNK",
-      "BPKB",
-      "kwitansi_jual_beli"
-    ]
-  },
-  {
-    "no": 6,
-    "jenis_pelayanan": "Cek_Tilang_ETLE",
-    "dokumen_yang_perlu_disiapkan": [
-      "NOPOL",
-      "HP"
-    ]
-  },
-  {
-    "no": 7,
-    "jenis_pelayanan": "SIM_Hilang_Rusak",
-    "dokumen_yang_perlu_disiapkan": [
-      "KTP",
-      "surat_kehilangan"
-    ]
-  },
-  {
-    "no": 8,
-    "jenis_pelayanan": "SIM_Internasional",
-    "dokumen_yang_perlu_disiapkan": [
-      "SIM_nasional",
-      "paspor",
-      "foto"
-    ]
-  },
-  {
-    "no": 9,
-    "jenis_pelayanan": "Mutasi_Kendaraan",
-    "dokumen_yang_perlu_disiapkan": [
-      "STNK",
-      "BPKB",
-      "KTP_pemilik"
-    ]
-  },
-  {
-    "no": 10,
-    "jenis_pelayanan": "Ganti_Data_STNK",
-    "dokumen_yang_perlu_disiapkan": [
-      "STNK",
-      "KTP",
-      "dokumen_pendukung"
-    ]
-  },
-  {
-    "no": 11,
-    "jenis_pelayanan": "Laporan_Kehilangan_STNK",
-    "dokumen_yang_perlu_disiapkan": [
-      "KTP",
-      "surat_kehilangan"
-    ]
-  },
-  {
-    "no": 12,
-    "jenis_pelayanan": "Klarifikasi_Pajak_Progresif",
-    "dokumen_yang_perlu_disiapkan": [
-      "KTP",
-      "STNK",
-      "dokumen_kendaraan_lain"
-    ]
-  },
-  {
-    "no": 13,
-    "jenis_pelayanan": "Blokir_Kendaraan_Lama",
-    "dokumen_yang_perlu_disiapkan": [
-      "KTP",
-      "STNK_lama_atau_bukti_jual_kendaraan"
-    ]
-  },
-  {
-    "no": 14,
-    "jenis_pelayanan": "Pelaporan_Kendaraan_Hilang",
-    "dokumen_yang_perlu_disiapkan": [
-      "KTP",
-      "STNK",
-      "BPKB",
-      "surat_kehilangan"
-    ]
-  },
-  {
-    "no": 15,
-    "jenis_pelayanan": "Cek_Status_SIM_STNK",
-    "dokumen_yang_perlu_disiapkan": [
-      "Nomor_SIM_atau_NOPOL",
-      "HP"
-    ]
-  }
-]
+{
+  "dataset_id": "polantas_menyapa_predefined_flows_v1",
+  "source": "data_polantas.xlsx (header row 4)",
+  "flows": [
+    {
+      "flow_id": "sheet1_001",
+      "title": "Buat SIM Baru (A / C / B /Truk )",
+      "sheet": "Sheet1",
+      "no": 1,
+      "documents_needed": [
+        "KTP asli",
+        "fotokopi KTP",
+        "HP aktif"
+      ],
+      "script": [
+        {
+          "turn": 1,
+          "user": "mau bikin sim dong sim A yang cepet gimana",
+          "assistant": "halo <name> sobat lantas\n<konteks>\n\nmau saya bantu carikan lokasi terdekat?\natau berencana online?"
+        },
+        {
+          "turn": 2,
+          "user": "mau dong online bagaimana",
+          "assistant": "silakan kamu kunjungi link berikut \njangan lupa siapkan data foto ktp, dan nomor hp aktif\n\nmau saya bantu buatkan pengajuan pembuatan SIM?"
+        },
+        {
+          "turn": 3,
+          "user": "mau dibantu buatin aja dong",
+          "assistant": "baik, kalo mau saya buatkan, SIM jenis apa yang kamu butuhkan?\nkirimkan ke saya foto berikut:\n1. ktp"
+        },
+        {
+          "turn": 4,
+          "user": "SIM A\n\nupload ktp",
+          "assistant": "baik kami bantu proseskan pembuatan sim A. kami sarankan untuk melakukan ujian teori\n\nberikut adalah ujian teorinya, kamu siap lakukan ujian teori?\n\npertanyaan 1."
+        },
+        {
+          "turn": 5,
+          "user": "jawab ujian",
+          "assistant": "selamat anda berhasil \n\nsilakan lakukan pembayaran pembuatan sim ke rek virtual ini :\n\nBRIVA : 12312312321"
+        },
+        {
+          "turn": 6,
+          "user": "kirim bukti transfer",
+          "assistant": "terima kasih, silakan kamu datang ke satpas layanan SIM dengan menunjukan kode berikut\n\nSIM/002/XII/12312312\nalamat satpas : jl xxxx"
+        }
+      ]
+    },
+    {
+      "flow_id": "sheet1_002",
+      "title": "Perpanjangan SIM (A / C)",
+      "sheet": "Sheet1",
+      "no": 2,
+      "documents_needed": [
+        "SIM lama",
+        "KTP",
+        "HP aktif"
+      ],
+      "script": [
+        {
+          "turn": 1,
+          "user": "sim saya mau diperpanjang bisa dibantu ga?",
+          "assistant": "halo <name> sobat lantas\nsaya bisa bantu perpanjangan SIM kamu\n\nsebelum lanjut, SIM kamu masih berlaku atau sudah mati?"
+        },
+        {
+          "turn": 2,
+          "user": "masih berlaku kok",
+          "assistant": "baik, perpanjangan SIM bisa dibantu secara online ke link berikut\nSINAR (SIM Nasional Presisi)\n\nsilakan siapkan dokumen berikut:\n1. foto SIM lama\n2. foto KTP\n3. nomor HP aktif\n\nmau saya bantu buatkan pengajuan perpanjangan SIM?"
+        },
+        {
+          "turn": 3,
+          "user": "iya dibuatin aja",
+          "assistant": "siap, SIM apa yang mau diperpanjang?\nSIM A atau SIM C?\n\nsilakan kirim:\n1. foto SIM lama\n2. foto KTP"
+        },
+        {
+          "turn": 4,
+          "user": "SIM C\nupload sim dan ktp",
+          "assistant": "baik, data perpanjangan SIM C kamu sudah kami terima\n\nkami sarankan untuk mengikuti tes kesehatan & psikologi secara online\n\napakah kamu siap melanjutkan proses perpanjangan?\n\npertanyaan 1 etc"
+        },
+        {
+          "turn": 5,
+          "user": "jawab ujian",
+          "assistant": "perpanjangan SIM C berhasil diajukan\n\nsilakan lakukan pembayaran perpanjangan SIM melalui rekening virtual berikut:\n\nBRIVA : 12312312321\n\nsetelah pembayaran berhasil, proses perpanjangan akan dilanjutkan"
+        },
+        {
+          "turn": 6,
+          "user": "kirim bukti transfer",
+          "assistant": "terima kasih, silakan kamu datang ke satpas layanan SIM dengan menunjukan kode berikut\n\nSIM/002/XII/12312312\nalamat satpas : jl xxxx"
+        }
+      ]
+    },
+    {
+      "flow_id": "sheet1_003",
+      "title": "Pembayaran Pajak Kendaraan Tahunan",
+      "sheet": "Sheet1",
+      "no": 3,
+      "documents_needed": [
+        "STNK",
+        "KTP pemilik",
+        "HP"
+      ],
+      "script": [
+        {
+          "turn": 1,
+          "user": "mau bayar pajak kendaraan tahunan bisa dibantu ga ya?",
+          "assistant": "halo <name> sobat lantas\nsaya bisa bantu informasi pembayaran pajak kendaraan tahunan kamu\n\nboleh diinformasikan, pajak kendaraan kamu masih aktif atau sedang menunggak?"
+        },
+        {
+          "turn": 2,
+          "user": "masih aktif kok",
+          "assistant": "baik, pembayaran pajak kendaraan tahunan dapat dilakukan melalui aplikasi resmi Samsat Digital (SIGNAL)\natau dengan datang langsung ke Samsat terdekat\n\njika kamu ingin, saya juga bisa bantu menyiapkan dan memproses pengajuan pembayaran melalui sistem kami\n\nsilakan siapkan:\n1. foto STNK\n2. foto KTP pemilik kendaraan\n3. nomor HP aktif\n\nmau saya bantu proseskan sekarang?"
+        },
+        {
+          "turn": 3,
+          "user": "nunggak sekitar 3 bulan",
+          "assistant": "baik, untuk pajak kendaraan yang menunggak masih dapat dibayarkan\n\nsebagai gambaran, denda keterlambatan pajak kendaraan umumnya sekitar:\n- ±2% per bulan dari pokok pajak\n\nnominal pastinya akan dihitung oleh sistem Samsat sesuai data kendaraan\n\npembayaran dapat dilakukan melalui aplikasi SIGNAL atau Samsat terdekat\n\njika kamu mau, saya juga bisa bantu proseskan pengajuan pembayaran dan pengecekan estimasi pajaknya\n\napakah mau dilanjutkan dibantu?"
+        },
+        {
+          "turn": 4,
+          "user": "iya dibuatin aja",
+          "assistant": "siap, mohon kirimkan data berikut:\n1. NOPOL kendaraan\n2. foto STNK\n3. foto KTP pemilik"
+        },
+        {
+          "turn": 5,
+          "user": "B1234XYZ\nupload stnk dan ktp",
+          "assistant": "baik, data pembayaran pajak kendaraan kamu sudah kami terima\n\nkami akan lakukan pengecekan status kendaraan serta estimasi pajak dan denda yang berlaku\n\npengajuan pembayaran pajak kendaraan berhasil dibuat\n\nsilakan lakukan pembayaran melalui rekening virtual berikut:\n\nBRIVA : 12312312321\n\nsetelah pembayaran berhasil, status pajak kendaraan akan diperbarui"
+        },
+        {
+          "turn": 6,
+          "user": "kirim bukti transfer",
+          "assistant": "terima kasih, silakan kamu datang ke samsat dengan menunjukan kode berikut\n\nPKT/002/XII/12312312\nalamat samsat : jl xxxx"
+        }
+      ]
+    },
+    {
+      "flow_id": "sheet1_004",
+      "title": "Pengesahan STNK 5 Tahunan",
+      "sheet": "Sheet1",
+      "no": 4,
+      "documents_needed": [
+        "STNK",
+        "BPKB",
+        "KTP pemilik",
+        "kendaraan"
+      ],
+      "script": [
+        {
+          "turn": 1,
+          "user": "mau pengesahan STNK 5 tahunan tolong dong dibantu?",
+          "assistant": "halo <name> sobat lantas\nsaya bisa bantu informasi dan proses pengesahan STNK 5 tahunan\n\nboleh diinformasikan, pajak kendaraan kamu masih aktif atau sedang menunggak?"
+        },
+        {
+          "turn": 2,
+          "user": "masih aktif kok",
+          "assistant": "baik, pengesahan STNK 5 tahunan dilakukan melalui Samsat dan memerlukan cek fisik kendaraan\n\nsebagai informasi, layanan SIGNAL (Samsat Digital Nasional) digunakan untuk informasi dan persiapan data, sedangkan proses pengesahan STNK 5 tahunan tetap dilanjutkan di Samsat\n\nsilakan siapkan:\n1. STNK asli\n2. BPKB asli\n3. KTP pemilik kendaraan\n4. kendaraan untuk cek fisik\n\njika kamu ingin, saya juga bisa bantu menyiapkan pengajuan dan data pendukung sebelum ke Samsat\n\nmau saya bantu proseskan sekarang?"
+        },
+        {
+          "turn": 3,
+          "user": "nunggak sekitar 6 bulan",
+          "assistant": "baik, pengesahan STNK 5 tahunan untuk kendaraan yang terlambat bayar tetap dapat diproses melalui Samsat\n\nsebagai estimasi, denda keterlambatan dihitung dari:\n- PKB (Pajak Kendaraan Bermotor) per tahun\n- SWDKLLJ (Sumbangan Wajib Dana Kecelakaan Lalu Lintas Jalan)\n\nperkiraan perhitungan denda:\n- denda PKB sebesar 25% dari nilai PKB setahun dikalikan jumlah bulan keterlambatan\n- ditambah denda SWDKLLJ, dengan besaran berbeda tergantung jenis kendaraan\n\ntotal denda dapat menjadi signifikan tergantung lama keterlambatan\n\nnominal akhir akan dihitung oleh sistem Samsat saat proses berlangsung\n\napakah ingin dilanjutkan?"
+        },
+        {
+          "turn": 4,
+          "user": "iya dibuatin aja",
+          "assistant": "siap, mohon kirimkan data berikut:\n1. NOPOL kendaraan\n2. foto STNK\n3. foto BPKB\n4. foto KTP pemilik kendaraan"
+        },
+        {
+          "turn": 5,
+          "user": "B1234XYZ\nupload stnk bpkb dan ktp",
+          "assistant": "baik, data pengesahan STNK 5 tahunan kamu sudah kami terima\n\npengajuan pengesahan STNK 5 tahunan berhasil dibuat\n\nsilakan lanjutkan proses di Samsat sesuai domisili kendaraan dengan membawa kendaraan untuk cek fisik"
+        },
+        {
+          "turn": 6,
+          "user": "lanjut",
+          "assistant": "terima kasih, silakan tunjukkan kode pengajuan berikut kepada petugas Samsat:\n\nSTNK5/002/XII/12312312\n\nsebagai informasi tambahan, apabila keterlambatan sangat lama (lebih dari 5 tahun), terdapat risiko sanksi tambahan sesuai ketentuan yang berlaku, dengan potensi denda administratif hingga Rp500.000 atau sanksi pidana maksimal 2 bulan, bergantung pada hasil pemeriksaan petugas"
+        }
+      ]
+    },
+    {
+      "flow_id": "sheet1_005",
+      "title": "Balik Nama Kendaraan",
+      "sheet": "Sheet1",
+      "no": 5,
+      "documents_needed": [
+        "KTP pemilik baru",
+        "KTP pemilik lama",
+        "STNK",
+        "BPKB",
+        "kwitansi jual beli"
+      ],
+      "script": [
+        {
+          "turn": 1,
+          "user": "mau balik nama kendaraan bisa dibantu ga ya?",
+          "assistant": "halo <name> sobat lantas\nsaya bisa bantu informasi dan proses balik nama kendaraan bermotor\n\nboleh diinformasikan, kendaraan sudah atas nama pemilik lama dan akan dibalik ke nama kamu?"
+        },
+        {
+          "turn": 2,
+          "user": "iya betul",
+          "assistant": "baik, balik nama kendaraan bermotor adalah proses pengalihan kepemilikan kendaraan ke nama pemilik baru dengan mengurus dokumen di Samsat\n\nproses ini meliputi:\n- cek fisik kendaraan\n- pembayaran pajak dan biaya administrasi\n- penerbitan STNK dan BPKB baru atas nama pemilik baru\n\ntujuannya agar kendaraan sah secara hukum atas nama kamu dan mempermudah administrasi ke depannya"
+        },
+        {
+          "turn": 3,
+          "user": "dokumen apa aja yang perlu disiapkan?",
+          "assistant": "dokumen wajib untuk balik nama kendaraan meliputi:\n1. KTP pemilik baru\n2. KTP pemilik lama\n3. STNK asli\n4. BPKB asli\n5. kuitansi jual beli bermeterai\n\njika kamu mau, saya bisa bantu cek kelengkapan data dan menyiapkan pengajuan"
+        },
+        {
+          "turn": 4,
+          "user": "biaya yang perlu dibayar apa aja?",
+          "assistant": "biaya balik nama kendaraan umumnya mencakup:\n- Pajak Kendaraan Bermotor (PKB)\n- SWDKLLJ (jika ada)\n- biaya PNBP penerbitan dokumen baru, meliputi:\n  • STNK baru\n  • BPKB baru\n  • TNKB (plat nomor) jika diperlukan\n\nbesaran biaya akan disesuaikan dengan data kendaraan dan dihitung saat proses di Samsat"
+        },
+        {
+          "turn": 5,
+          "user": "iya dibantu prosesnya",
+          "assistant": "siap, silakan kirimkan data berikut:\n1. NOPOL kendaraan\n2. foto STNK\n3. foto BPKB\n4. foto KTP pemilik baru\n5. foto KTP pemilik lama\n6. foto kuitansi jual beli bermeterai"
+        },
+        {
+          "turn": 6,
+          "user": "data sudah dikirm",
+          "assistant": "baik, data balik nama kendaraan kamu sudah kami terima\n\nselanjutnya, silakan datang ke Samsat sesuai domisili kendaraan untuk:\n- cek fisik kendaraan\n- pembayaran pajak dan biaya administrasi\n- pengambilan STNK dan BPKB baru\n\nsilakan tunjukkan kode pengajuan berikut kepada petugas:\n\nBNK/003/XII/12312312"
+        }
+      ]
+    },
+    {
+      "flow_id": "sheet1_006",
+      "title": "Cek Tilang / ETLE",
+      "sheet": "Sheet1",
+      "no": 6,
+      "documents_needed": [
+        "NOPOL",
+        "HP"
+      ],
+      "script": []
+    },
+    {
+      "flow_id": "sheet1_007",
+      "title": "SIM Hilang / Rusak",
+      "sheet": "Sheet1",
+      "no": 7,
+      "documents_needed": [
+        "KTP",
+        "surat kehilangan"
+      ],
+      "script": []
+    },
+    {
+      "flow_id": "sheet1_008",
+      "title": "SIM Internasional",
+      "sheet": "Sheet1",
+      "no": 8,
+      "documents_needed": [
+        "SIM nasional",
+        "paspor",
+        "foto"
+      ],
+      "script": []
+    },
+    {
+      "flow_id": "sheet1_009",
+      "title": "Mutasi Kendaraan",
+      "sheet": "Sheet1",
+      "no": 9,
+      "documents_needed": [
+        "STNK",
+        "BPKB",
+        "KTP pemilik"
+      ],
+      "script": []
+    },
+    {
+      "flow_id": "sheet1_010",
+      "title": "Ganti Data STNK",
+      "sheet": "Sheet1",
+      "no": 10,
+      "documents_needed": [
+        "STNK",
+        "KTP",
+        "dokumen pendukung"
+      ],
+      "script": []
+    },
+    {
+      "flow_id": "sheet1_011",
+      "title": "Laporan Kehilangan STNK",
+      "sheet": "Sheet1",
+      "no": 11,
+      "documents_needed": [
+        "KTP",
+        "surat kehilangan"
+      ],
+      "script": []
+    },
+    {
+      "flow_id": "sheet1_012",
+      "title": "Klarifikasi Pajak Progresif",
+      "sheet": "Sheet1",
+      "no": 12,
+      "documents_needed": [
+        "KTP",
+        "STNK",
+        "dokumen kendaraan lain"
+      ],
+      "script": []
+    },
+    {
+      "flow_id": "sheet1_013",
+      "title": "Blokir Kendaraan Lama",
+      "sheet": "Sheet1",
+      "no": 13,
+      "documents_needed": [
+        "KTP",
+        "STNK lama atau bukti jual kendaraan"
+      ],
+      "script": []
+    },
+    {
+      "flow_id": "sheet1_014",
+      "title": "Pelaporan Kendaraan Hilang",
+      "sheet": "Sheet1",
+      "no": 14,
+      "documents_needed": [
+        "KTP",
+        "STNK",
+        "BPKB",
+        "surat kehilangan"
+      ],
+      "script": []
+    },
+    {
+      "flow_id": "sheet1_015",
+      "title": "Cek Status SIM / STNK",
+      "sheet": "Sheet1",
+      "no": 15,
+      "documents_needed": [
+        "Nomor SIM atau NOPOL",
+        "HP"
+      ],
+      "script": []
+    }
+  ]
+}

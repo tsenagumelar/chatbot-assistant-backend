@@ -3,6 +3,7 @@ package models
 // Request & Response structures for Chat
 type ChatRequest struct {
 	Message   string             `json:"message" validate:"required"`
+	Name      string             `json:"name,omitempty"` // Nama user (opsional)
 	Context   Context            `json:"context"`
 	SessionID string             `json:"session_id,omitempty"` // Session ID untuk backend-managed history
 	History   []OpenAIMessage    `json:"history,omitempty"`    // Optional: untuk backward compatibility
@@ -10,6 +11,7 @@ type ChatRequest struct {
 }
 
 type Context struct {
+	Name                  string         `json:"name,omitempty"` // Nama user
 	Location              string         `json:"location"`
 	Speed                 float64        `json:"speed"`
 	Traffic               string         `json:"traffic"`
@@ -117,17 +119,33 @@ type ETilangInfo struct {
 	TotalFine     int                `json:"total_fine"`
 }
 
-// Pelayanan structures
-type PelayananData struct {
-	No                        int      `json:"no"`
-	JenisPelayanan            string   `json:"jenis_pelayanan"`
-	DokumenYangPerluDisiapkan []string `json:"dokumen_yang_perlu_disiapkan"`
+// Pelayanan structures (NEW FORMAT with flows)
+type PelayananScriptTurn struct {
+	Turn      int    `json:"turn"`
+	User      string `json:"user"`
+	Assistant string `json:"assistant"`
+}
+
+type PelayananFlow struct {
+	FlowID          string                `json:"flow_id"`
+	Title           string                `json:"title"`
+	Sheet           string                `json:"sheet"`
+	No              int                   `json:"no"`
+	DocumentsNeeded []string              `json:"documents_needed"`
+	Script          []PelayananScriptTurn `json:"script"`
+}
+
+type PelayananDataset struct {
+	DatasetID string          `json:"dataset_id"`
+	Source    string          `json:"source"`
+	Flows     []PelayananFlow `json:"flows"`
 }
 
 type PelayananInfo struct {
-	Found     bool          `json:"found"`
-	Pelayanan PelayananData `json:"pelayanan,omitempty"`
-	Query     string        `json:"query"`
+	Found       bool          `json:"found"`
+	Flow        PelayananFlow `json:"flow,omitempty"`
+	Query       string        `json:"query"`
+	CurrentTurn int           `json:"current_turn,omitempty"` // Track conversation progress
 }
 
 // Document upload structures

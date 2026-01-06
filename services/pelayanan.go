@@ -9,19 +9,17 @@ import (
 )
 
 type PelayananService struct {
-	data []models.PelayananData
+	dataset models.PelayananDataset
 }
 
 func NewPelayananService() *PelayananService {
-	service := &PelayananService{
-		data: []models.PelayananData{},
-	}
+	service := &PelayananService{}
 
 	// Load data from JSON file
 	if err := service.loadData(); err != nil {
 		log.Printf("⚠️  Failed to load pelayanan data: %v", err)
 	} else {
-		log.Printf("✅ Pelayanan Service initialized with %d services", len(service.data))
+		log.Printf("✅ Pelayanan Service initialized with %d flows", len(service.dataset.Flows))
 	}
 
 	return service
@@ -34,15 +32,15 @@ func (s *PelayananService) loadData() error {
 		return err
 	}
 
-	// Parse JSON
-	if err := json.Unmarshal(file, &s.data); err != nil {
+	// Parse JSON into new structure
+	if err := json.Unmarshal(file, &s.dataset); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// SearchPelayanan searches for service information based on user query
+// SearchPelayanan searches for service flow based on user query
 func (s *PelayananService) SearchPelayanan(query string) *models.PelayananInfo {
 	queryLower := strings.ToLower(query)
 
@@ -69,167 +67,162 @@ func (s *PelayananService) SearchPelayanan(query string) *models.PelayananInfo {
 		}
 	}
 
-	// Search in data based on matched type and specific keywords
-	for _, pelayanan := range s.data {
-		jenisPelayanan := strings.ToLower(pelayanan.JenisPelayanan)
-		jenisPelayananReadable := strings.ReplaceAll(jenisPelayanan, "_", " ")
+	// Search in flows based on matched type and specific keywords
+	for _, flow := range s.dataset.Flows {
+		titleLower := strings.ToLower(flow.Title)
 
-		// Direct match with service name
-		if strings.Contains(jenisPelayananReadable, queryLower) {
-			log.Printf("🔍 Found pelayanan: %s (direct match)", pelayanan.JenisPelayanan)
+		// Direct match with flow title
+		if strings.Contains(titleLower, queryLower) {
+			log.Printf("🔍 Found flow: %s (direct match)", flow.Title)
 			return &models.PelayananInfo{
-				Found:     true,
-				Pelayanan: pelayanan,
-				Query:     query,
+				Found:       true,
+				Flow:        flow,
+				Query:       query,
+				CurrentTurn: 0,
 			}
 		}
 
-		// Specific matching logic
+		// Specific matching logic based on keywords
 		switch matchedType {
 		case "SIM":
 			if strings.Contains(queryLower, "buat") || strings.Contains(queryLower, "bikin") {
-				if strings.Contains(jenisPelayanan, "buat_sim") {
-					log.Printf("🔍 Found pelayanan: %s (create SIM)", pelayanan.JenisPelayanan)
+				if strings.Contains(titleLower, "buat") && strings.Contains(titleLower, "sim") {
+					log.Printf("🔍 Found flow: %s (create SIM)", flow.Title)
 					return &models.PelayananInfo{
-						Found:     true,
-						Pelayanan: pelayanan,
-						Query:     query,
+						Found:       true,
+						Flow:        flow,
+						Query:       query,
+						CurrentTurn: 0,
 					}
 				}
 			} else if strings.Contains(queryLower, "perpanjang") {
-				if strings.Contains(jenisPelayanan, "perpanjangan_sim") {
-					log.Printf("🔍 Found pelayanan: %s (renew SIM)", pelayanan.JenisPelayanan)
+				if strings.Contains(titleLower, "perpanjangan") && strings.Contains(titleLower, "sim") {
+					log.Printf("🔍 Found flow: %s (renew SIM)", flow.Title)
 					return &models.PelayananInfo{
-						Found:     true,
-						Pelayanan: pelayanan,
-						Query:     query,
-					}
-				}
-			} else if strings.Contains(queryLower, "hilang") || strings.Contains(queryLower, "rusak") {
-				if strings.Contains(jenisPelayanan, "sim_hilang") {
-					log.Printf("🔍 Found pelayanan: %s (lost/damaged SIM)", pelayanan.JenisPelayanan)
-					return &models.PelayananInfo{
-						Found:     true,
-						Pelayanan: pelayanan,
-						Query:     query,
+						Found:       true,
+						Flow:        flow,
+						Query:       query,
+						CurrentTurn: 0,
 					}
 				}
 			} else if strings.Contains(queryLower, "internasional") {
-				if strings.Contains(jenisPelayanan, "sim_internasional") {
-					log.Printf("🔍 Found pelayanan: %s (international SIM)", pelayanan.JenisPelayanan)
+				if strings.Contains(titleLower, "internasional") {
+					log.Printf("🔍 Found flow: %s (international SIM)", flow.Title)
 					return &models.PelayananInfo{
-						Found:     true,
-						Pelayanan: pelayanan,
-						Query:     query,
+						Found:       true,
+						Flow:        flow,
+						Query:       query,
+						CurrentTurn: 0,
 					}
 				}
 			}
 		case "STNK":
 			if strings.Contains(queryLower, "pajak") {
-				if strings.Contains(jenisPelayanan, "pajak_kendaraan") {
-					log.Printf("🔍 Found pelayanan: %s (vehicle tax)", pelayanan.JenisPelayanan)
+				if strings.Contains(titleLower, "pajak") {
+					log.Printf("🔍 Found flow: %s (vehicle tax)", flow.Title)
 					return &models.PelayananInfo{
-						Found:     true,
-						Pelayanan: pelayanan,
-						Query:     query,
+						Found:       true,
+						Flow:        flow,
+						Query:       query,
+						CurrentTurn: 0,
 					}
 				}
 			} else if strings.Contains(queryLower, "pengesahan") || strings.Contains(queryLower, "5 tahun") {
-				if strings.Contains(jenisPelayanan, "pengesahan_stnk") {
-					log.Printf("🔍 Found pelayanan: %s (STNK validation)", pelayanan.JenisPelayanan)
+				if strings.Contains(titleLower, "pengesahan") {
+					log.Printf("🔍 Found flow: %s (STNK validation)", flow.Title)
 					return &models.PelayananInfo{
-						Found:     true,
-						Pelayanan: pelayanan,
-						Query:     query,
+						Found:       true,
+						Flow:        flow,
+						Query:       query,
+						CurrentTurn: 0,
 					}
 				}
 			} else if strings.Contains(queryLower, "ganti data") {
-				if strings.Contains(jenisPelayanan, "ganti_data_stnk") {
-					log.Printf("🔍 Found pelayanan: %s (change STNK data)", pelayanan.JenisPelayanan)
+				if strings.Contains(titleLower, "ganti data") {
+					log.Printf("🔍 Found flow: %s (change STNK data)", flow.Title)
 					return &models.PelayananInfo{
-						Found:     true,
-						Pelayanan: pelayanan,
-						Query:     query,
+						Found:       true,
+						Flow:        flow,
+						Query:       query,
+						CurrentTurn: 0,
 					}
 				}
 			} else if strings.Contains(queryLower, "hilang") {
-				if strings.Contains(jenisPelayanan, "laporan_kehilangan_stnk") {
-					log.Printf("🔍 Found pelayanan: %s (lost STNK)", pelayanan.JenisPelayanan)
+				if strings.Contains(titleLower, "kehilangan") && strings.Contains(titleLower, "stnk") {
+					log.Printf("🔍 Found flow: %s (lost STNK)", flow.Title)
 					return &models.PelayananInfo{
-						Found:     true,
-						Pelayanan: pelayanan,
-						Query:     query,
+						Found:       true,
+						Flow:        flow,
+						Query:       query,
+						CurrentTurn: 0,
 					}
 				}
 			} else if strings.Contains(queryLower, "cek status") {
-				if strings.Contains(jenisPelayanan, "cek_status") {
-					log.Printf("🔍 Found pelayanan: %s (check status)", pelayanan.JenisPelayanan)
+				if strings.Contains(titleLower, "cek status") {
+					log.Printf("🔍 Found flow: %s (check status)", flow.Title)
 					return &models.PelayananInfo{
-						Found:     true,
-						Pelayanan: pelayanan,
-						Query:     query,
+						Found:       true,
+						Flow:        flow,
+						Query:       query,
+						CurrentTurn: 0,
 					}
 				}
 			}
-		case "Tilang":
-			if strings.Contains(jenisPelayanan, "cek_tilang") || strings.Contains(jenisPelayanan, "etle") {
-				log.Printf("🔍 Found pelayanan: %s (e-tilang check)", pelayanan.JenisPelayanan)
+		case "BPN":
+			if strings.Contains(titleLower, "balik nama") || strings.Contains(titleLower, "mutasi") {
+				log.Printf("🔍 Found flow: %s (vehicle transfer)", flow.Title)
 				return &models.PelayananInfo{
-					Found:     true,
-					Pelayanan: pelayanan,
-					Query:     query,
+					Found:       true,
+					Flow:        flow,
+					Query:       query,
+					CurrentTurn: 0,
 				}
 			}
-		case "BPN":
-			if strings.Contains(jenisPelayanan, "balik_nama") {
-				log.Printf("🔍 Found pelayanan: %s (vehicle transfer)", pelayanan.JenisPelayanan)
+		case "Kehilangan":
+			if strings.Contains(titleLower, "kehilangan") || strings.Contains(titleLower, "hilang") {
+				log.Printf("🔍 Found flow: %s (report lost)", flow.Title)
 				return &models.PelayananInfo{
-					Found:     true,
-					Pelayanan: pelayanan,
-					Query:     query,
-				}
-			} else if strings.Contains(jenisPelayanan, "mutasi") {
-				log.Printf("🔍 Found pelayanan: %s (vehicle mutation)", pelayanan.JenisPelayanan)
-				return &models.PelayananInfo{
-					Found:     true,
-					Pelayanan: pelayanan,
-					Query:     query,
+					Found:       true,
+					Flow:        flow,
+					Query:       query,
+					CurrentTurn: 0,
 				}
 			}
 		}
 	}
 
-	// If no specific match, try fuzzy matching with all services
-	for _, pelayanan := range s.data {
-		jenisPelayanan := strings.ToLower(pelayanan.JenisPelayanan)
-		parts := strings.Split(jenisPelayanan, "_")
+	// If no specific match, try fuzzy matching with all flows
+	for _, flow := range s.dataset.Flows {
+		titleLower := strings.ToLower(flow.Title)
+		words := strings.Fields(titleLower)
 
 		matchCount := 0
-		for _, part := range parts {
-			if strings.Contains(queryLower, part) {
+		for _, word := range words {
+			if strings.Contains(queryLower, word) {
 				matchCount++
 			}
 		}
 
-		// If at least 2 parts match, consider it a match
+		// If at least 2 words match, consider it a match
 		if matchCount >= 2 {
-			log.Printf("🔍 Found pelayanan: %s (fuzzy match)", pelayanan.JenisPelayanan)
+			log.Printf("🔍 Found flow: %s (fuzzy match)", flow.Title)
 			return &models.PelayananInfo{
-				Found:     true,
-				Pelayanan: pelayanan,
-				Query:     query,
+				Found:       true,
+				Flow:        flow,
+				Query:       query,
+				CurrentTurn: 0,
 			}
 		}
 	}
 
-	log.Printf("📝 No pelayanan found for query: %s", query)
+	log.Printf("📝 No flow found for query: %s", query)
 	return &models.PelayananInfo{
 		Found: false,
 		Query: query,
 	}
 }
 
-// GetAllPelayanan returns all available services
-func (s *PelayananService) GetAllPelayanan() []models.PelayananData {
-	return s.data
+// GetAllFlows returns all available service flows
+func (s *PelayananService) GetAllFlows() []models.PelayananFlow {
+	return s.dataset.Flows
 }

@@ -1,0 +1,136 @@
+[
+  {
+    "no": 1,
+    "jenis_pelayanan": "Buat_SIM_Baru_A_C",
+    "dokumen_yang_perlu_disiapkan": [
+      "KTP_asli",
+      "fotokopi_KTP",
+      "HP_aktif"
+    ]
+  },
+  {
+    "no": 2,
+    "jenis_pelayanan": "Perpanjangan_SIM_A_C",
+    "dokumen_yang_perlu_disiapkan": [
+      "SIM_lama",
+      "KTP",
+      "HP_aktif"
+    ]
+  },
+  {
+    "no": 3,
+    "jenis_pelayanan": "Pembayaran_Pajak_Kendaraan_Tahunan",
+    "dokumen_yang_perlu_disiapkan": [
+      "STNK",
+      "KTP_pemilik",
+      "HP"
+    ]
+  },
+  {
+    "no": 4,
+    "jenis_pelayanan": "Pengesahan_STNK_5_Tahunan",
+    "dokumen_yang_perlu_disiapkan": [
+      "STNK",
+      "BPKB",
+      "KTP_pemilik",
+      "kendaraan"
+    ]
+  },
+  {
+    "no": 5,
+    "jenis_pelayanan": "Balik_Nama_Kendaraan",
+    "dokumen_yang_perlu_disiapkan": [
+      "KTP_pemilik_baru",
+      "KTP_pemilik_lama",
+      "STNK",
+      "BPKB",
+      "kwitansi_jual_beli"
+    ]
+  },
+  {
+    "no": 6,
+    "jenis_pelayanan": "Cek_Tilang_ETLE",
+    "dokumen_yang_perlu_disiapkan": [
+      "NOPOL",
+      "HP"
+    ]
+  },
+  {
+    "no": 7,
+    "jenis_pelayanan": "SIM_Hilang_Rusak",
+    "dokumen_yang_perlu_disiapkan": [
+      "KTP",
+      "surat_kehilangan"
+    ]
+  },
+  {
+    "no": 8,
+    "jenis_pelayanan": "SIM_Internasional",
+    "dokumen_yang_perlu_disiapkan": [
+      "SIM_nasional",
+      "paspor",
+      "foto"
+    ]
+  },
+  {
+    "no": 9,
+    "jenis_pelayanan": "Mutasi_Kendaraan",
+    "dokumen_yang_perlu_disiapkan": [
+      "STNK",
+      "BPKB",
+      "KTP_pemilik"
+    ]
+  },
+  {
+    "no": 10,
+    "jenis_pelayanan": "Ganti_Data_STNK",
+    "dokumen_yang_perlu_disiapkan": [
+      "STNK",
+      "KTP",
+      "dokumen_pendukung"
+    ]
+  },
+  {
+    "no": 11,
+    "jenis_pelayanan": "Laporan_Kehilangan_STNK",
+    "dokumen_yang_perlu_disiapkan": [
+      "KTP",
+      "surat_kehilangan"
+    ]
+  },
+  {
+    "no": 12,
+    "jenis_pelayanan": "Klarifikasi_Pajak_Progresif",
+    "dokumen_yang_perlu_disiapkan": [
+      "KTP",
+      "STNK",
+      "dokumen_kendaraan_lain"
+    ]
+  },
+  {
+    "no": 13,
+    "jenis_pelayanan": "Blokir_Kendaraan_Lama",
+    "dokumen_yang_perlu_disiapkan": [
+      "KTP",
+      "STNK_lama_atau_bukti_jual_kendaraan"
+    ]
+  },
+  {
+    "no": 14,
+    "jenis_pelayanan": "Pelaporan_Kendaraan_Hilang",
+    "dokumen_yang_perlu_disiapkan": [
+      "KTP",
+      "STNK",
+      "BPKB",
+      "surat_kehilangan"
+    ]
+  },
+  {
+    "no": 15,
+    "jenis_pelayanan": "Cek_Status_SIM_STNK",
+    "dokumen_yang_perlu_disiapkan": [
+      "Nomor_SIM_atau_NOPOL",
+      "HP"
+    ]
+  }
+]
