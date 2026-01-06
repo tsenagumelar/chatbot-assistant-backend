@@ -18,11 +18,15 @@ Backend untuk Police Assistant - asisten virtual berbasis AI untuk membantu peng
 
 ### Fitur Utama
 
-- **Chat dengan AI**: Menggunakan Claude AI untuk memberikan response yang kontekstual
+- **Chat dengan AI**: Menggunakan OpenAI GPT-4o untuk memberikan response yang kontekstual
 - **Chat History**: AI mengingat konteks percakapan sebelumnya
 - **Session Management**: Backend otomatis mengelola history chat per session
 - **Location Context**: Mendukung informasi lokasi, kecepatan, dan kondisi lalu lintas
 - **Auto Cleanup**: Session otomatis dibersihkan setelah 24 jam tidak aktif
+- **E-Tilang Check**: Cek pelanggaran e-tilang berdasarkan nomor polisi
+- **Pelayanan Info**: Informasi pelayanan polisi dan dokumen yang diperlukan
+- **Document Upload**: Dukungan upload dokumen untuk berbagai pelayanan
+- **🆕 SIM Flow**: Alur percakapan terstruktur untuk perpanjangan/pembuatan SIM (lihat [SIM_FLOW.md](SIM_FLOW.md))
 
 ---
 

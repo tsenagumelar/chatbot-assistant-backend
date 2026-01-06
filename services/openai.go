@@ -193,6 +193,61 @@ DETAIL PELANGGARAN:
 `
 	}
 
+	// Build SIM Flow context if active
+	simFlowContext := ""
+	if context.SIMFlowInfo != nil && context.SIMFlowInfo.Active {
+		simFlowContext = `
+🪪 MODE ALUR PERPANJANGAN/PEMBUATAN SIM AKTIF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️⚠️⚠️ INSTRUKSI WAJIB - SANGAT PENTING ⚠️⚠️⚠️
+
+ANDA SEKARANG DALAM MODE ALUR TERSTRUKTUR UNTUK PERPANJANGAN/PEMBUATAN SIM.
+
+📋 ATURAN YANG HARUS DIIKUTI:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. ✅ GUNAKAN TEKS PERSIS dari NodeText yang diberikan di bawah
+2. ✅ JIKA ada pilihan (Choices), FORMAT sebagai list bernomor yang jelas
+3. ✅ JANGAN menambahkan informasi tambahan di luar alur yang sudah ditentukan
+4. ✅ IKUTI alur yang sudah ditentukan dengan tepat
+5. ✅ Gunakan bahasa yang ramah dan santai, tapi tetap ikuti teks yang diberikan
+6. ✅ Jika user memberikan input yang tidak sesuai pilihan, tanyakan lagi dengan sopan
+
+`
+		simFlowContext += fmt.Sprintf("📍 POSISI SAAT INI DALAM ALUR:\n   Node ID: %s\n   Tipe: %s\n\n", context.SIMFlowInfo.CurrentNode, context.SIMFlowInfo.NodeType)
+		simFlowContext += fmt.Sprintf("💬 TEKS YANG HARUS ANDA SAMPAIKAN:\n%s\n\n", context.SIMFlowInfo.NodeText)
+
+		if len(context.SIMFlowInfo.Choices) > 0 {
+			simFlowContext += "📌 PILIHAN YANG HARUS DITAMPILKAN (WAJIB FORMAT SEBAGAI LIST BERNOMOR):\n"
+			for i, choice := range context.SIMFlowInfo.Choices {
+				simFlowContext += fmt.Sprintf("   %d. %s\n", i+1, choice.Label)
+			}
+			simFlowContext += "\n⚠️ Tampilkan pilihan ini dengan JELAS dan minta user memilih salah satu\n"
+		}
+
+		simFlowContext += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📝 CONTOH FORMAT RESPONS YANG BENAR:
+
+Jika NodeType = "question" dengan pilihan:
+"[NodeText dari sistem]
+
+Silakan pilih salah satu:
+1. [Choice 1]
+2. [Choice 2]
+3. [Choice 3]"
+
+Jika NodeType = "message" tanpa pilihan:
+"[NodeText dari sistem persis seperti yang diberikan]"
+
+Jika NodeType = "collect" untuk mengumpulkan dokumen:
+"[NodeText dari sistem]
+
+Silakan upload dokumen yang diminta yaa 📤"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+`
+	}
+
 	// Get current date and time
 	currentTime := time.Now()
 	currentDate := currentTime.Format("Monday, 2 January 2006")
@@ -218,7 +273,7 @@ KONTEKS PENGGUNA SAAT INI:
 🚦 Kondisi Traffic: %s
 📤 Dokumen Diupload: %t (%d dokumen)
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-%s%s
+%s%s%s
 
 PENTING - MANAJEMEN KONTEKS PERCAKAPAN:
 ⚠️ SELALU ingat dan referensikan informasi dari pesan-pesan sebelumnya dalam percakapan ini
@@ -379,6 +434,7 @@ Berikan respons yang membantu, relevan, dan sesuai dengan situasi pengguna saat 
 		context.UploadedDocumentCount,
 		etilangInfo,
 		pelayananInfo,
+		simFlowContext,
 		context.Speed,
 	)
 }

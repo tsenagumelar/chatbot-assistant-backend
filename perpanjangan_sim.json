@@ -1,0 +1,255 @@
+{
+  "flow_id": "polantas_menyapa_sim_v1",
+  "version": "1.0.0",
+  "locale": "id-ID",
+  "entry_node": "start",
+  "context_schema": {
+    "sim_type": { "type": "string", "enum": ["A", "C", "A_C"] },
+    "ever_had_sim": { "type": "boolean" },
+    "sim_still_valid": { "type": "boolean" },
+    "process_type": { "type": "string", "enum": ["PERPANJANGAN", "BARU"] },
+    "uploads": {
+      "type": "object",
+      "properties": {
+        "ktp": { "type": "string" },
+        "sim_lama": { "type": "string" },
+        "surat_sehat": { "type": "string" },
+        "tes_psikologi": { "type": "string" }
+      }
+    }
+  },
+  "nodes": [
+    {
+      "id": "start",
+      "type": "message",
+      "text": "Baik, Sobat Lantas. Saya bisa membantu menyiapkan dokumen terkait SIM.\nSilakan pilih jenis SIM:",
+      "choices": [
+        { "id": "sim_a", "label": "SIM A", "value": "A" },
+        { "id": "sim_c", "label": "SIM C", "value": "C" },
+        { "id": "sim_ac", "label": "SIM A & C", "value": "A_C" }
+      ],
+      "on_select": [
+        { "set": { "sim_type": "{{choice.value}}" } }
+      ],
+      "transitions": [
+        { "when": "choice.id == 'sim_c'", "to": "ask_ever_had_sim" },
+        { "when": "choice.id == 'sim_a'", "to": "ask_ever_had_sim" },
+        { "when": "choice.id == 'sim_ac'", "to": "ask_ever_had_sim" }
+      ]
+    },
+
+    {
+      "id": "ask_ever_had_sim",
+      "type": "question",
+      "text": "Baik, Sobat Lantas.\nApakah Anda sudah pernah memiliki SIM sebelumnya?",
+      "choices": [
+        { "id": "ever_yes", "label": "Ya", "value": true },
+        { "id": "ever_no", "label": "Belum pernah", "value": false }
+      ],
+      "on_select": [
+        { "set": { "ever_had_sim": "{{choice.value}}" } }
+      ],
+      "transitions": [
+        { "when": "choice.id == 'ever_yes'", "to": "ask_sim_validity" },
+        { "when": "choice.id == 'ever_no'", "to": "new_sim_offer_help" }
+      ]
+    },
+
+    {
+      "id": "ask_sim_validity",
+      "type": "question",
+      "text": "Baik, Sobat Lantas.\nApakah SIM Anda masih dalam masa berlaku?",
+      "choices": [
+        { "id": "valid_yes", "label": "Ya, masih berlaku", "value": true },
+        { "id": "valid_no", "label": "Tidak / Sudah mati", "value": false }
+      ],
+      "on_select": [
+        { "set": { "sim_still_valid": "{{choice.value}}" } }
+      ],
+      "transitions": [
+        { "when": "choice.id == 'valid_yes'", "to": "renewal_offer_help" },
+        { "when": "choice.id == 'valid_no'", "to": "expired_to_new_info" }
+      ]
+    },
+
+    {
+      "id": "renewal_offer_help",
+      "type": "question",
+      "text": "Baik, Sobat Lantas.\nSIM Anda masih berlaku dan dapat diproses sebagai perpanjangan SIM.\nSaya dapat membantu menyiapkan dokumen perpanjangan SIM.\n\nSilakan pilih:",
+      "choices": [
+        { "id": "renew_help_yes", "label": "Ya, bantu siapkan dokumen", "value": "PERPANJANGAN" },
+        { "id": "renew_to_digital", "label": "Tidak, arahkan langsung ke Digital Korlantas", "value": "DIGITAL_ONLY" }
+      ],
+      "on_select": [
+        {
+          "set": {
+            "process_type": "PERPANJANGAN"
+          },
+          "when": "choice.id == 'renew_help_yes'"
+        }
+      ],
+      "transitions": [
+        { "when": "choice.id == 'renew_help_yes'", "to": "upload_ktp_renewal" },
+        { "when": "choice.id == 'renew_to_digital'", "to": "handoff_digital_korlantas" }
+      ]
+    },
+
+    {
+      "id": "upload_ktp_renewal",
+      "type": "collect",
+      "text": "Silakan upload KTP, Sobat Lantas.",
+      "collect": { "key": "uploads.ktp", "mime": ["image/*", "application/pdf"] },
+      "transitions": [{ "when": "collect.ok == true", "to": "upload_sim_lama" }]
+    },
+    {
+      "id": "upload_sim_lama",
+      "type": "collect",
+      "text": "Silakan upload SIM lama, Sobat Lantas.",
+      "collect": { "key": "uploads.sim_lama", "mime": ["image/*", "application/pdf"] },
+      "transitions": [{ "when": "collect.ok == true", "to": "upload_surat_sehat_renewal" }]
+    },
+    {
+      "id": "upload_surat_sehat_renewal",
+      "type": "collect",
+      "text": "Silakan upload surat keterangan sehat, Sobat Lantas.",
+      "collect": { "key": "uploads.surat_sehat", "mime": ["image/*", "application/pdf"] },
+      "transitions": [{ "when": "collect.ok == true", "to": "upload_psikologi_renewal" }]
+    },
+    {
+      "id": "upload_psikologi_renewal",
+      "type": "collect",
+      "text": "Silakan upload hasil tes psikologi SIM, Sobat Lantas.",
+      "collect": { "key": "uploads.tes_psikologi", "mime": ["image/*", "application/pdf"] },
+      "transitions": [{ "when": "collect.ok == true", "to": "renewal_compiling" }]
+    },
+
+    {
+      "id": "renewal_compiling",
+      "type": "message",
+      "text": "Terima kasih, Sobat Lantas.\nDokumen perpanjangan SIM Anda sudah lengkap.\nSistem sedang menyusun berkas perpanjangan SIM.",
+      "transitions": [{ "when": "true", "to": "renewal_ready" }]
+    },
+    {
+      "id": "renewal_ready",
+      "type": "question",
+      "text": "Berkas perpanjangan SIM telah siap, Sobat Lantas.\n\nSilakan pilih:",
+      "choices": [
+        { "id": "renew_download", "label": "Unduh berkas", "value": "DOWNLOAD" },
+        { "id": "renew_go_digital", "label": "Lanjut ke Digital Korlantas", "value": "DIGITAL" },
+        { "id": "renew_done", "label": "Selesai", "value": "DONE" }
+      ],
+      "transitions": [
+        { "when": "choice.id == 'renew_download'", "to": "download_package" },
+        { "when": "choice.id == 'renew_go_digital'", "to": "handoff_digital_korlantas" },
+        { "when": "choice.id == 'renew_done'", "to": "end" }
+      ]
+    },
+
+    {
+      "id": "expired_to_new_info",
+      "type": "message",
+      "text": "Baik, Sobat Lantas.\nSIM Anda sudah melewati masa berlaku.\nPerpanjangan tidak dapat dilakukan dan harus melalui pembuatan SIM baru.\n\nSaya dapat membantu menyiapkan dokumen pembuatan SIM baru, Sobat Lantas."
+    },
+    {
+      "id": "new_sim_offer_help",
+      "type": "question",
+      "text": "Silakan pilih:",
+      "choices": [
+        { "id": "new_help_yes", "label": "Ya, bantu siapkan dokumen", "value": "BARU" },
+        { "id": "new_to_digital", "label": "Tidak, arahkan langsung ke Digital Korlantas", "value": "DIGITAL_ONLY" }
+      ],
+      "on_select": [
+        {
+          "set": {
+            "process_type": "BARU"
+          },
+          "when": "choice.id == 'new_help_yes'"
+        }
+      ],
+      "transitions": [
+        { "when": "choice.id == 'new_help_yes'", "to": "upload_ktp_new" },
+        { "when": "choice.id == 'new_to_digital'", "to": "handoff_digital_korlantas" }
+      ]
+    },
+
+    {
+      "id": "upload_ktp_new",
+      "type": "collect",
+      "text": "Silakan upload KTP, Sobat Lantas.",
+      "collect": { "key": "uploads.ktp", "mime": ["image/*", "application/pdf"] },
+      "transitions": [{ "when": "collect.ok == true", "to": "upload_surat_sehat_new" }]
+    },
+    {
+      "id": "upload_surat_sehat_new",
+      "type": "collect",
+      "text": "Silakan upload surat keterangan sehat, Sobat Lantas.",
+      "collect": { "key": "uploads.surat_sehat", "mime": ["image/*", "application/pdf"] },
+      "transitions": [{ "when": "collect.ok == true", "to": "upload_psikologi_new" }]
+    },
+    {
+      "id": "upload_psikologi_new",
+      "type": "collect",
+      "text": "Silakan upload hasil tes psikologi SIM, Sobat Lantas.",
+      "collect": { "key": "uploads.tes_psikologi", "mime": ["image/*", "application/pdf"] },
+      "transitions": [{ "when": "collect.ok == true", "to": "new_compiling" }]
+    },
+
+    {
+      "id": "new_compiling",
+      "type": "message",
+      "text": "Terima kasih, Sobat Lantas.\nDokumen pembuatan SIM baru Anda sudah lengkap.\nSistem sedang menyusun berkas pembuatan SIM baru.",
+      "transitions": [{ "when": "true", "to": "new_ready" }]
+    },
+    {
+      "id": "new_ready",
+      "type": "question",
+      "text": "Berkas pembuatan SIM baru telah siap, Sobat Lantas.\n\nSilakan pilih:",
+      "choices": [
+        { "id": "new_download", "label": "Unduh berkas", "value": "DOWNLOAD" },
+        { "id": "new_go_digital", "label": "Lanjut ke Digital Korlantas", "value": "DIGITAL" },
+        { "id": "new_done", "label": "Selesai", "value": "DONE" }
+      ],
+      "transitions": [
+        { "when": "choice.id == 'new_download'", "to": "download_package" },
+        { "when": "choice.id == 'new_go_digital'", "to": "handoff_digital_korlantas" },
+        { "when": "choice.id == 'new_done'", "to": "end" }
+      ]
+    },
+
+    {
+      "id": "download_package",
+      "type": "action",
+      "action": {
+        "type": "generate_zip",
+        "template": "berkas_sim",
+        "inputs": [
+          "uploads.ktp",
+          "uploads.sim_lama",
+          "uploads.surat_sehat",
+          "uploads.tes_psikologi"
+        ],
+        "output_key": "generated_package_url"
+      },
+      "transitions": [{ "when": "action.ok == true", "to": "download_ready" }]
+    },
+    {
+      "id": "download_ready",
+      "type": "message",
+      "text": "Silakan unduh berkas Anda di tautan berikut:\n{{generated_package_url}}",
+      "transitions": [{ "when": "true", "to": "end" }]
+    },
+
+    {
+      "id": "handoff_digital_korlantas",
+      "type": "action",
+      "action": {
+        "type": "handoff",
+        "target": "DIGITAL_KORLANTAS",
+        "reason": "USER_REQUEST"
+      },
+      "transitions": [{ "when": "true", "to": "end" }]
+    },
+
+    { "id": "end", "type": "message", "text": "Selesai. Terima kasih, Sobat Lantas." }
+  ]
+}

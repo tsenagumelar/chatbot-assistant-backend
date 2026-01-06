@@ -14,14 +14,16 @@ type ChatHandler struct {
 	orsService       *services.ORSService
 	etilangService   *services.ETilangService
 	pelayananService *services.PelayananService
+	simFlowService   *services.SIMFlowService
 }
 
-func NewChatHandler(openaiService *services.OpenAIService, orsService *services.ORSService, etilangService *services.ETilangService, pelayananService *services.PelayananService) *ChatHandler {
+func NewChatHandler(openaiService *services.OpenAIService, orsService *services.ORSService, etilangService *services.ETilangService, pelayananService *services.PelayananService, simFlowService *services.SIMFlowService) *ChatHandler {
 	return &ChatHandler{
 		openaiService:    openaiService,
 		orsService:       orsService,
 		etilangService:   etilangService,
 		pelayananService: pelayananService,
+		simFlowService:   simFlowService,
 	}
 }
 
@@ -97,6 +99,44 @@ func (h *ChatHandler) HandleChat(c *fiber.Ctx) error {
 		}
 	}
 
+	// Check if user is talking about SIM renewal (perpanjangan/pembuatan SIM)
+	if h.simFlowService.DetectSIMIntent(req.Message) {
+		log.Printf("🪪 SIM flow detected")
+
+		// Get current node from session (if exists)
+		currentNodeID := sessionStore.GetData(req.SessionID, "sim_flow_current_node")
+		if currentNodeID == "" {
+			// First time, start from entry node
+			currentNodeID = "entry_node"
+			sessionStore.SetData(req.SessionID, "sim_flow_current_node", currentNodeID)
+			log.Printf("🆕 Starting SIM flow from entry_node")
+		} else {
+			log.Printf("📍 Continuing SIM flow from node: %s", currentNodeID)
+		}
+
+		// Get current node
+		currentNode := h.simFlowService.GetCurrentNode(currentNodeID)
+		if currentNode != nil {
+			// Process user choice to get next node
+			nextNodeID, nextNode := h.simFlowService.ProcessUserChoice(currentNode, req.Message)
+
+			if nextNode != nil {
+				// Update session to next node
+				sessionStore.SetData(req.SessionID, "sim_flow_current_node", nextNodeID)
+				log.Printf("➡️  Moving to next node: %s (type: %s)", nextNodeID, nextNode.Type)
+
+				// Get flow info for this node
+				flowInfo := h.simFlowService.GetSIMFlowInfo(nextNodeID)
+				req.Context.SIMFlowInfo = flowInfo
+			} else {
+				// No transition matched, stay on current node
+				log.Printf("⏸️  No transition matched, staying on node: %s", currentNodeID)
+				flowInfo := h.simFlowService.GetSIMFlowInfo(currentNodeID)
+				req.Context.SIMFlowInfo = flowInfo
+			}
+		}
+	}
+
 	// Check if user is asking about e-tilang
 	messageLower = strings.ToLower(req.Message)
 	if strings.Contains(messageLower, "tilang") || strings.Contains(messageLower, "pelanggaran") ||
@@ -160,5 +200,6 @@ func (h *ChatHandler) HandleChat(c *fiber.Ctx) error {
 		SessionID:     req.SessionID, // Return session ID ke frontend
 		ETilangInfo:   req.Context.ETilangInfo,
 		PelayananInfo: req.Context.PelayananInfo,
+		SIMFlowInfo:   req.Context.SIMFlowInfo,
 	})
 }

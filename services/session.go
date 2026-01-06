@@ -18,6 +18,7 @@ type SessionStore struct {
 type Session struct {
 	ID        string
 	History   []models.OpenAIMessage
+	Data      map[string]string // Generic data storage for flow states, etc.
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -48,6 +49,7 @@ func (s *SessionStore) CreateSession() string {
 	s.sessions[sessionID] = &Session{
 		ID:        sessionID,
 		History:   []models.OpenAIMessage{},
+		Data:      make(map[string]string),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
@@ -75,6 +77,7 @@ func (s *SessionStore) AddMessage(sessionID string, role string, content string)
 		session = &Session{
 			ID:        sessionID,
 			History:   []models.OpenAIMessage{},
+			Data:      make(map[string]string),
 			CreatedAt: time.Now(),
 		}
 		s.sessions[sessionID] = session
@@ -132,6 +135,40 @@ func (s *SessionStore) GetSessionCount() int {
 	defer s.mu.RUnlock()
 
 	return len(s.sessions)
+}
+
+// GetData mengambil data arbitrary dari session
+func (s *SessionStore) GetData(sessionID string, key string) string {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	session, exists := s.sessions[sessionID]
+	if !exists {
+		return ""
+	}
+
+	return session.Data[key]
+}
+
+// SetData menyimpan data arbitrary ke session
+func (s *SessionStore) SetData(sessionID string, key string, value string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	session, exists := s.sessions[sessionID]
+	if !exists {
+		// Create session if not exists
+		session = &Session{
+			ID:        sessionID,
+			History:   []models.OpenAIMessage{},
+			Data:      make(map[string]string),
+			CreatedAt: time.Now(),
+		}
+		s.sessions[sessionID] = session
+	}
+
+	session.Data[key] = value
+	session.UpdatedAt = time.Now()
 }
 
 // cleanupExpiredSessions membersihkan session yang sudah tidak aktif > 24 jam

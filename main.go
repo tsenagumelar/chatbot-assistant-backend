@@ -32,9 +32,10 @@ func main() {
 	orsService := services.NewORSService()
 	etilangService := services.NewETilangService()
 	pelayananService := services.NewPelayananService()
+	simFlowService := services.NewSIMFlowService()
 
 	// Initialize handlers
-	chatHandler := handlers.NewChatHandler(openaiService, orsService, etilangService, pelayananService)
+	chatHandler := handlers.NewChatHandler(openaiService, orsService, etilangService, pelayananService, simFlowService)
 	trafficHandler := handlers.NewTrafficHandler(orsService)
 	routeHandler := handlers.NewRouteHandler(orsService)
 	sessionHandler := handlers.NewSessionHandler()

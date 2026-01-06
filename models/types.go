@@ -17,6 +17,7 @@ type Context struct {
 	Longitude             float64        `json:"longitude"`
 	ETilangInfo           *ETilangInfo   `json:"e_tilang_info,omitempty"`  // Info tilang jika dicek
 	PelayananInfo         *PelayananInfo `json:"pelayanan_info,omitempty"` // Info pelayanan jika ditanyakan
+	SIMFlowInfo           *SIMFlowInfo   `json:"sim_flow_info,omitempty"`  // Info flow SIM jika aktif
 	HasUploadedDocuments  bool           `json:"has_uploaded_documents"`   // Flag jika user upload dokumen
 	UploadedDocumentCount int            `json:"uploaded_document_count"`  // Jumlah dokumen yang diupload
 }
@@ -27,6 +28,7 @@ type ChatResponse struct {
 	SessionID     string         `json:"session_id,omitempty"`     // Return session ID ke frontend
 	ETilangInfo   *ETilangInfo   `json:"e_tilang_info,omitempty"`  // Info tilang jika dicek
 	PelayananInfo *PelayananInfo `json:"pelayanan_info,omitempty"` // Info pelayanan jika ditanyakan
+	SIMFlowInfo   *SIMFlowInfo   `json:"sim_flow_info,omitempty"`  // Info flow SIM jika aktif
 	Error         string         `json:"error,omitempty"`
 }
 
@@ -136,4 +138,18 @@ type UploadedDocument struct {
 	URL         string `json:"url"`         // Or URL if file is hosted elsewhere
 	UploadedAt  string `json:"uploaded_at"` // Timestamp
 	Description string `json:"description"` // Optional: "KTP", "Surat Kehilangan", etc.
+}
+
+// SIM Flow structures
+type SIMFlowInfo struct {
+	Active      bool            `json:"active"`
+	CurrentNode string          `json:"current_node"`
+	NodeType    string          `json:"node_type"`
+	NodeText    string          `json:"node_text"`
+	Choices     []SIMFlowChoice `json:"choices,omitempty"`
+}
+
+type SIMFlowChoice struct {
+	ID    string `json:"id"`
+	Label string `json:"label"`
 }
