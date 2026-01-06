@@ -118,7 +118,7 @@ func (h *ChatHandler) HandleChat(c *fiber.Ctx) error {
 		currentNode := h.simFlowService.GetCurrentNode(currentNodeID)
 		if currentNode != nil {
 			// Process user choice to get next node
-			nextNodeID, nextNode := h.simFlowService.ProcessUserChoice(currentNode, req.Message)
+			nextNodeID, nextNode := h.simFlowService.ProcessUserChoice(currentNodeID, req.Message)
 
 			if nextNode != nil {
 				// Update session to next node
