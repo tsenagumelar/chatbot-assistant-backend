@@ -1,7 +1,7 @@
 package services
 
 import (
-	"errors"
+	ctx "context"
 	"fmt"
 	"log"
 	"police-assistant-backend/config"
@@ -9,26 +9,23 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-resty/resty/v2"
+	"github.com/openai/openai-go"
+	"github.com/openai/openai-go/option"
 )
 
-const openaiAPIURL = "https://api.openai.com/v1/chat/completions"
-
 type OpenAIService struct {
-	client *resty.Client
+	client *openai.Client
 }
 
 func NewOpenAIService() *OpenAIService {
-	client := resty.New()
-
-	// Set OpenAI specific headers
-	client.SetHeader("Authorization", "Bearer "+config.AppConfig.OpenAIAPIKey)
-	client.SetHeader("Content-Type", "application/json")
+	client := openai.NewClient(
+		option.WithAPIKey(config.AppConfig.OpenAIAPIKey),
+	)
 
 	log.Println("✅ OpenAI Service initialized")
 
 	return &OpenAIService{
-		client: client,
+		client: &client,
 	}
 }
 
@@ -40,49 +37,42 @@ func (s *OpenAIService) Chat(message string, context models.Context, history []m
 	systemPrompt := s.buildSystemPrompt(context, isFirstMessage)
 
 	// Build messages array with history
-	messages := []models.OpenAIMessage{
-		{
-			Role:    "system",
-			Content: systemPrompt,
-		},
+	messages := []openai.ChatCompletionMessageParamUnion{
+		openai.SystemMessage(systemPrompt),
 	}
 
 	// Add conversation history if provided
 	if len(history) > 0 {
 		log.Printf("📚 Including %d messages from history", len(history))
-		messages = append(messages, history...)
+		for _, msg := range history {
+			if msg.Role == "user" {
+				messages = append(messages, openai.UserMessage(msg.Content))
+			} else if msg.Role == "assistant" {
+				messages = append(messages, openai.AssistantMessage(msg.Content))
+			}
+		}
 	}
 
 	// Add current user message
-	messages = append(messages, models.OpenAIMessage{
-		Role:    "user",
-		Content: message,
-	})
-
-	// Prepare OpenAI request
-	reqBody := models.OpenAIRequest{
-		Model:               config.AppConfig.OpenAIModel,
-		Messages:            messages,
-		Temperature:         0.7,
-		MaxCompletionTokens: 1000,
-	}
+	messages = append(messages, openai.UserMessage(message))
 
 	log.Printf("🤖 Sending request to OpenAI (model: %s)", config.AppConfig.OpenAIModel)
 
-	// Make API call
-	var response models.OpenAIResponse
-	resp, err := s.client.R().
-		SetBody(reqBody).
-		SetResult(&response).
-		Post(openaiAPIURL)
+	// Make API call using official SDK
+	apiContext := ctx.Background()
+	temperature := float64(0.7)
+	maxTokens := int64(1000)
+
+	response, err := s.client.Chat.Completions.New(apiContext, openai.ChatCompletionNewParams{
+		Model:               openai.ChatModel(config.AppConfig.OpenAIModel),
+		Messages:            messages,
+		Temperature:         openai.Float(temperature),
+		MaxCompletionTokens: openai.Int(maxTokens),
+	})
 
 	if err != nil {
+		log.Printf("❌ OpenAI API error: %v", err)
 		return "", fmt.Errorf("failed to call OpenAI API: %w", err)
-	}
-
-	if resp.StatusCode() != 200 {
-		log.Printf("❌ OpenAI API error: Status %d, Body: %s", resp.StatusCode(), resp.String())
-		return "", fmt.Errorf("OpenAI API returned status %d: %s", resp.StatusCode(), resp.String())
 	}
 
 	// Extract response text
@@ -92,7 +82,7 @@ func (s *OpenAIService) Chat(message string, context models.Context, history []m
 		return content, nil
 	}
 
-	return "", errors.New("empty response from OpenAI")
+	return "", fmt.Errorf("empty response from OpenAI")
 }
 
 func (s *OpenAIService) buildSystemPrompt(context models.Context, isFirstMessage bool) string {
@@ -258,6 +248,34 @@ PERATURAN LALU LINTAS INDONESIA (referensi):
 - Tidak boleh menggunakan HP saat berkendara
 - Tidak boleh menerobos lampu merah
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📌 INFORMASI TERKINI INDONESIA (WAJIB DIGUNAKAN):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Presiden Indonesia saat ini: Prabowo Subianto (sejak 20 Oktober 2024)
+✅ Wakil Presiden: Gibran Rakabuming Raka
+✅ Kapolri: Jenderal Listyo Sigit Prabowo
+📌 Kakorlantas: Informasi terakhir per April 2024 adalah Irjen Pol. Agus Suryonugroho
+
+⚠️⚠️⚠️ BATASAN PENGETAHUAN - SANGAT PENTING ⚠️⚠️⚠️
+1. Knowledge cutoff model ini: April 2024
+2. Untuk informasi pejabat/jabatan yang mungkin sudah berubah setelah April 2024:
+   - Berikan informasi TERAKHIR yang diketahui
+   - Sampaikan bahwa ini adalah informasi per April 2024
+   - WAJIB sarankan cek website resmi untuk info terkini
+
+3. CONTOH RESPONS WAJIB untuk pertanyaan tentang Kakorlantas:
+   "Berdasarkan informasi terakhir yang saya miliki per April 2024, Kakorlantas Polri adalah Irjen Pol. Firman Shantyabudi.
+   
+   Namun untuk informasi paling akurat dan terkini (Januari 2026), silakan cek:
+   🌐 Website Korlantas Polri: korlantas.polri.go.id
+   📱 Instagram: @korlantas_polri atau @tmcpoldametro
+   🌐 Website Polri: polri.go.id
+   
+   Posisi pejabat bisa berubah, jadi sebaiknya konfirmasi langsung ke sumber resmi yaa Sobat Lantas!"
+
+4. Selalu berikan informasi yang ada + arahkan ke sumber resmi untuk konfirmasi
+5. Untuk tanggal/waktu, gunakan INFORMASI WAKTU SAAT INI yang sudah diberikan
+
 PERSONA "SOBAT LANTAS":
 ✓ Anda adalah asisten yang ramah, peduli, dan fokus pada keselamatan berkendara
 ✓ Gunakan bahasa yang santai tapi tetap informatif dan profesional
@@ -367,32 +385,39 @@ Berikan respons yang membantu, relevan, dan sesuai dengan situasi pengguna saat 
 
 // ChatWithHistory allows for conversation history (optional for MVP)
 func (s *OpenAIService) ChatWithHistory(messages []models.OpenAIMessage) (string, error) {
-	reqBody := models.OpenAIRequest{
-		Model:               config.AppConfig.OpenAIModel,
-		Messages:            messages,
-		Temperature:         0.7,
-		MaxCompletionTokens: 1000,
+	apiContext := ctx.Background()
+	temperature := float64(0.7)
+	maxTokens := int64(1000)
+
+	// Convert to OpenAI SDK format
+	sdkMessages := []openai.ChatCompletionMessageParamUnion{}
+	for _, msg := range messages {
+		switch msg.Role {
+		case "system":
+			sdkMessages = append(sdkMessages, openai.SystemMessage(msg.Content))
+		case "user":
+			sdkMessages = append(sdkMessages, openai.UserMessage(msg.Content))
+		case "assistant":
+			sdkMessages = append(sdkMessages, openai.AssistantMessage(msg.Content))
+		}
 	}
 
-	var response models.OpenAIResponse
-	resp, err := s.client.R().
-		SetBody(reqBody).
-		SetResult(&response).
-		Post(openaiAPIURL)
+	response, err := s.client.Chat.Completions.New(apiContext, openai.ChatCompletionNewParams{
+		Model:               openai.ChatModel(config.AppConfig.OpenAIModel),
+		Messages:            sdkMessages,
+		Temperature:         openai.Float(temperature),
+		MaxCompletionTokens: openai.Int(maxTokens),
+	})
 
 	if err != nil {
 		return "", fmt.Errorf("failed to call OpenAI API: %w", err)
-	}
-
-	if resp.StatusCode() != 200 {
-		return "", fmt.Errorf("OpenAI API returned status %d", resp.StatusCode())
 	}
 
 	if len(response.Choices) > 0 {
 		return response.Choices[0].Message.Content, nil
 	}
 
-	return "", errors.New("empty response from OpenAI")
+	return "", fmt.Errorf("empty response from OpenAI")
 }
 
 // Helper function to format Rupiah

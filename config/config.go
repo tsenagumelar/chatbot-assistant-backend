@@ -27,7 +27,7 @@ func LoadConfig() {
 		Port:         getEnv("PORT", "8080"),
 		OpenAIAPIKey: getEnv("OPENAI_API_KEY", ""),
 		ORSAPIKey:    getEnv("OPENROUTESERVICE_API_KEY", ""),
-		OpenAIModel:  getEnv("OPENAI_MODEL", "gpt-4"),
+		OpenAIModel:  getEnv("OPENAI_MODEL", "gpt-5.1"),
 	}
 
 	// Validate required keys
