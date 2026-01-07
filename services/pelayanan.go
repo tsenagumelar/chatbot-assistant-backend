@@ -45,25 +45,50 @@ func (s *PelayananService) SearchPelayanan(query string) *models.PelayananInfo {
 	queryLower := strings.ToLower(query)
 
 	// Keywords untuk berbagai jenis pelayanan
+	// Priority matters: more specific keywords should be checked first
 	keywords := map[string][]string{
 		"SIM":        {"sim", "surat izin mengemudi", "bikin sim", "buat sim", "perpanjang sim", "perpanjangan sim", "sim hilang", "sim rusak", "sim internasional"},
 		"STNK":       {"stnk", "pajak kendaraan", "pajak motor", "pajak mobil", "pengesahan stnk", "stnk hilang", "ganti data stnk", "lapor kehilangan stnk"},
 		"Tilang":     {"tilang", "etle", "e-tilang", "cek tilang", "pelanggaran"},
 		"BPN":        {"balik nama", "mutasi kendaraan", "mutasi"},
-		"Kehilangan": {"hilang", "kehilangan", "lapor kehilangan"},
+		"Kehilangan": {"lapor kehilangan"},
 	}
 
-	// Try to match with keywords first
+	// Try to match with keywords first - check in priority order
 	matchedType := ""
-	for serviceType, words := range keywords {
-		for _, word := range words {
+	// Check SIM first (higher priority for specific SIM-related queries)
+	if matchedType == "" {
+		for _, word := range keywords["SIM"] {
 			if strings.Contains(queryLower, word) {
-				matchedType = serviceType
+				matchedType = "SIM"
 				break
 			}
 		}
-		if matchedType != "" {
-			break
+	}
+	// Then check STNK
+	if matchedType == "" {
+		for _, word := range keywords["STNK"] {
+			if strings.Contains(queryLower, word) {
+				matchedType = "STNK"
+				break
+			}
+		}
+	}
+	// Then check others
+	if matchedType == "" {
+		for serviceType, words := range keywords {
+			if serviceType == "SIM" || serviceType == "STNK" {
+				continue // Already checked
+			}
+			for _, word := range words {
+				if strings.Contains(queryLower, word) {
+					matchedType = serviceType
+					break
+				}
+			}
+			if matchedType != "" {
+				break
+			}
 		}
 	}
 
@@ -85,7 +110,28 @@ func (s *PelayananService) SearchPelayanan(query string) *models.PelayananInfo {
 		// Specific matching logic based on keywords
 		switch matchedType {
 		case "SIM":
-			if strings.Contains(queryLower, "buat") || strings.Contains(queryLower, "bikin") {
+			// Check for SIM hilang/rusak first (more specific)
+			if (strings.Contains(queryLower, "hilang") || strings.Contains(queryLower, "rusak")) && strings.Contains(queryLower, "sim") {
+				if (strings.Contains(titleLower, "hilang") || strings.Contains(titleLower, "rusak")) && strings.Contains(titleLower, "sim") {
+					log.Printf("🔍 Found flow: %s (lost/damaged SIM)", flow.Title)
+					return &models.PelayananInfo{
+						Found:       true,
+						Flow:        flow,
+						Query:       query,
+						CurrentTurn: 0,
+					}
+				}
+			} else if strings.Contains(queryLower, "internasional") {
+				if strings.Contains(titleLower, "internasional") {
+					log.Printf("🔍 Found flow: %s (international SIM)", flow.Title)
+					return &models.PelayananInfo{
+						Found:       true,
+						Flow:        flow,
+						Query:       query,
+						CurrentTurn: 0,
+					}
+				}
+			} else if strings.Contains(queryLower, "buat") || strings.Contains(queryLower, "bikin") {
 				if strings.Contains(titleLower, "buat") && strings.Contains(titleLower, "sim") {
 					log.Printf("🔍 Found flow: %s (create SIM)", flow.Title)
 					return &models.PelayananInfo{
@@ -98,16 +144,6 @@ func (s *PelayananService) SearchPelayanan(query string) *models.PelayananInfo {
 			} else if strings.Contains(queryLower, "perpanjang") {
 				if strings.Contains(titleLower, "perpanjangan") && strings.Contains(titleLower, "sim") {
 					log.Printf("🔍 Found flow: %s (renew SIM)", flow.Title)
-					return &models.PelayananInfo{
-						Found:       true,
-						Flow:        flow,
-						Query:       query,
-						CurrentTurn: 0,
-					}
-				}
-			} else if strings.Contains(queryLower, "internasional") {
-				if strings.Contains(titleLower, "internasional") {
-					log.Printf("🔍 Found flow: %s (international SIM)", flow.Title)
 					return &models.PelayananInfo{
 						Found:       true,
 						Flow:        flow,
@@ -169,18 +205,32 @@ func (s *PelayananService) SearchPelayanan(query string) *models.PelayananInfo {
 				}
 			}
 		case "BPN":
-			if strings.Contains(titleLower, "balik nama") || strings.Contains(titleLower, "mutasi") {
-				log.Printf("🔍 Found flow: %s (vehicle transfer)", flow.Title)
-				return &models.PelayananInfo{
-					Found:       true,
-					Flow:        flow,
-					Query:       query,
-					CurrentTurn: 0,
+			// Check for mutasi first (more specific)
+			if strings.Contains(queryLower, "mutasi") {
+				if strings.Contains(titleLower, "mutasi") {
+					log.Printf("🔍 Found flow: %s (vehicle mutation)", flow.Title)
+					return &models.PelayananInfo{
+						Found:       true,
+						Flow:        flow,
+						Query:       query,
+						CurrentTurn: 0,
+					}
+				}
+			} else if strings.Contains(queryLower, "balik nama") {
+				if strings.Contains(titleLower, "balik nama") {
+					log.Printf("🔍 Found flow: %s (vehicle transfer)", flow.Title)
+					return &models.PelayananInfo{
+						Found:       true,
+						Flow:        flow,
+						Query:       query,
+						CurrentTurn: 0,
+					}
 				}
 			}
 		case "Kehilangan":
-			if strings.Contains(titleLower, "kehilangan") || strings.Contains(titleLower, "hilang") {
-				log.Printf("🔍 Found flow: %s (report lost)", flow.Title)
+			// Only match for STNK kehilangan, not SIM kehilangan (SIM handled in SIM case)
+			if strings.Contains(queryLower, "stnk") && (strings.Contains(titleLower, "kehilangan") || strings.Contains(titleLower, "hilang")) && strings.Contains(titleLower, "stnk") {
+				log.Printf("🔍 Found flow: %s (report lost STNK)", flow.Title)
 				return &models.PelayananInfo{
 					Found:       true,
 					Flow:        flow,

@@ -89,19 +89,26 @@ func (s *OpenAIService) Chat(message string, context models.Context, history []m
 func (s *OpenAIService) buildSystemPrompt(context models.Context, isFirstMessage bool) string {
 	greetingInstruction := ""
 	if isFirstMessage {
-		greetingInstruction = `
+		// Determine greeting name
+		greetingName := "Sobat Lantas"
+		if context.Name != "" {
+			greetingName = context.Name
+		}
+		greetingInstruction = fmt.Sprintf(`
 ⭐ INSTRUKSI SAPAAN KHUSUS:
-- Untuk pesan PERTAMA ANDA dalam percakapan ini, WAJIB mulai dengan sapaan: "Halo Sobat Lantas!"
+- Untuk pesan PERTAMA ANDA dalam percakapan ini, WAJIB mulai dengan sapaan: "Halo %s!"
 - Setelah sapaan, langsung lanjutkan dengan respons yang ramah dan membantu
-- Untuk pesan selanjutnya, TIDAK PERLU menggunakan sapaan "Halo Sobat Lantas!" lagi
+- Untuk pesan selanjutnya, TIDAK PERLU menggunakan sapaan lagi
 - Gunakan persona yang ramah, peduli keselamatan, dan menggunakan bahasa yang santai tapi informatif
-`
+- JANGAN gunakan sapaan ganda seperti "Halo [nama] Sobat Lantas" - hanya gunakan satu sapaan saja
+`, greetingName)
 	} else {
 		greetingInstruction = `
 ⭐ INSTRUKSI SAPAAN:
-- Ini bukan pesan pertama, jadi JANGAN gunakan sapaan "Halo Sobat Lantas!"
+- Ini bukan pesan pertama, jadi JANGAN gunakan sapaan "Halo" dengan nama apapun
 - Langsung jawab pertanyaan dengan ramah dan membantu
 - Tetap gunakan persona yang peduli keselamatan dan informatif
+- JANGAN gunakan sapaan ganda seperti "Halo [nama] Sobat Lantas" - tidak perlu sapaan sama sekali
 `
 	}
 
@@ -236,10 +243,11 @@ DETAIL PELANGGARAN:
 
 			pelayananInfo += "💡 CONTOH PENGGUNAAN:\n"
 			if context.Name != "" {
-				pelayananInfo += "Jika script mengatakan: \"halo <name> sobat lantas\\n<konteks>\"\n"
-				pelayananInfo += fmt.Sprintf("Anda harus jawab: \"halo %s sobat lantas\\nSaya lihat Anda sedang di %s\"\n\n", context.Name, context.Location)
+				pelayananInfo += "Jika script mengatakan: \"halo <name>\\n<konteks>\"\n"
+				pelayananInfo += fmt.Sprintf("Anda harus jawab: \"halo %s\\nSaya lihat Anda sedang di %s\"\n\n", context.Name, context.Location)
+				pelayananInfo += "⚠️ PENTING: HANYA gunakan nama user SAJA, JANGAN tambahkan 'Sobat Lantas' di belakangnya\n\n"
 			} else {
-				pelayananInfo += "Jika script mengatakan: \"halo <name> sobat lantas\\n<konteks>\"\n"
+				pelayananInfo += "Jika script mengatakan: \"halo <name>\\n<konteks>\"\n"
 				pelayananInfo += fmt.Sprintf("Anda harus jawab: \"halo Sobat Lantas\\nSaya lihat Anda sedang di %s\"\n\n", context.Location)
 			}
 		} else {
@@ -538,11 +546,13 @@ GAYA KOMUNIKASI:
 ✓ Untuk list/poin, gunakan angka (1. 2. 3.) atau emoji, BUKAN asterisk (*)
 
 CONTOH RESPONS YANG BAIK:
-- Pesan PERTAMA: "Halo Sobat Lantas! Demi keselamatan, sebaiknya jangan bonceng dua anak kecil yaa. Bahaya banget loh. Anak-anak harus pakai helm SNI dan cukup satu saja yang dibonceng. Utamakan keselamatan keluarga kita!"
+- Pesan PERTAMA (jika nama user diketahui): "Halo [Nama User]! Demi keselamatan, sebaiknya jangan bonceng dua anak kecil yaa. Bahaya banget loh. Anak-anak harus pakai helm SNI dan cukup satu saja yang dibonceng. Utamakan keselamatan keluarga kita!"
+- Pesan PERTAMA (jika nama belum diketahui): "Halo Sobat Lantas! Demi keselamatan, sebaiknya jangan bonceng dua anak kecil yaa. Bahaya banget loh. Anak-anak harus pakai helm SNI dan cukup satu saja yang dibonceng. Utamakan keselamatan keluarga kita!"
 - Pesan lanjutan: "Wah, kecepatan kamu saat ini [kecepatan] km/jam sudah melebihi batas dalam kota nih. Kurangi kecepatan yaa demi keselamatan!"
+- PENTING: Hanya gunakan SATU sapaan saja (hanya nama ATAU Sobat Lantas, JANGAN keduanya)
 - "Kondisi lalu lintas di depan lagi padat nih. Mending ambil rute alternatif biar gak macet."
 - "Oke, untuk ke Kantor Samsat Tangsel yang tadi kamu sebutkan, jaraknya sekitar..."
-- E-Tilang (ada pelanggaran): "Untuk kendaraan dengan nomor polisi [nomor], ada [jumlah] pelanggaran yang tercatat nih. Total dendanya Rp [total]. Sebaiknya segera dilunasi yaa biar gak kena denda tambahan."
+- E-Tilang (ada pelanggaran): "Untuk kendaraan dengan nomor polisi [nomor], ada [jumlah] pelanggaran yang tercatat nih. Total dendanya Rp [total]. Sebaiknya segera dilunasi yaa. Kamu bisa bayar online di https://etle-pmj.id/ untuk kemudahan pembayaran."
 - E-Tilang (bersih): "Kabar baik! Untuk kendaraan dengan nomor polisi [nomor] tidak ada tilang yang tercatat. Tetap patuhi peraturan lalu lintas yaa!"
 - Pelayanan (follow-up): "Apakah Anda membutuhkan bantuan untuk proses pembuatan SIM A ini?"
 - Pelayanan (minta upload): "Baik! Untuk melanjutkan proses pembuatan SIM A, silakan upload dokumen-dokumen berikut yaa:
@@ -554,7 +564,8 @@ CONTOH RESPONS YANG BAIK:
 
 INSTRUKSI KHUSUS E-TILANG:
 - Jika ada data e-tilang di konteks, sampaikan informasinya dengan jelas dan ramah
-- Untuk pelanggaran yang belum dibayar, ingatkan untuk segera melunasi
+- Untuk pelanggaran yang belum dibayar, ingatkan untuk segera melunasi dan WAJIB berikan link pembayaran: https://etle-pmj.id/
+- Contoh: "Sebaiknya segera dilunasi yaa. Kamu bisa bayar online di https://etle-pmj.id/ untuk kemudahan pembayaran."
 - Berikan apresiasi jika kendaraan bersih dari pelanggaran
 - Gunakan format yang mudah dibaca dengan poin-poin jika ada banyak pelanggaran
 
@@ -570,8 +581,8 @@ INSTRUKSI KHUSUS PELAYANAN:
      ...
      
      Silakan upload dokumen-dokumen tersebut di sini 📤"
-  * LANGKAH 3: Jika user menyatakan sudah upload dokumen (kata kunci: "sudah upload", "sudah saya kirim", "done", "sudah", "oke sudah"), berikan konfirmasi dengan ramah:
-    "Terima kasih Sobat Lantas! ✅
+  * LANGKAH 3: Jika user menyatakan sudah upload dokumen (kata kunci: "sudah upload", "sudah saya kirim", "done", "sudah", "oke sudah"), berikan konfirmasi dengan ramah (gunakan nama user jika ada):
+    "Terima kasih [Nama User / Sobat Lantas]! ✅
     
     Dokumen Anda sudah kami terima dengan baik. Tim kami akan segera memproses permohonan [nama pelayanan] Anda.
     
@@ -584,12 +595,12 @@ INSTRUKSI KHUSUS PELAYANAN:
     
     Anda akan mendapatkan notifikasi melalui HP yang terdaftar untuk update status permohonan.
     
-    Ada yang ingin ditanyakan lagi, Sobat Lantas? 😊"
+    Ada yang ingin ditanyakan lagi? 😊"
 
 INSTRUKSI KHUSUS UPLOAD DOKUMEN:
 - Jika context.HasUploadedDocuments = true, ini berarti user SUDAH UPLOAD DOKUMEN
-- WAJIB berikan konfirmasi penerimaan dokumen dengan format berikut:
-  "Terima kasih Sobat Lantas! ✅
+- WAJIB berikan konfirmasi penerimaan dokumen dengan format berikut (gunakan nama user jika ada):
+  "Terima kasih [Nama User / Sobat Lantas]! ✅
   
   Dokumen yang Anda upload sudah kami terima dengan baik ({UploadedDocumentCount} dokumen).
   
@@ -602,12 +613,13 @@ INSTRUKSI KHUSUS UPLOAD DOKUMEN:
   
   Anda akan mendapatkan notifikasi melalui HP yang terdaftar untuk update status permohonan.
   
-  Ada yang ingin ditanyakan lagi, Sobat Lantas? 😊"
+  Ada yang ingin ditanyakan lagi? 😊"
 - Gunakan emoji ✅ untuk konfirmasi
 - Tunjukkan profesionalisme dan kepastian proses
 - Berikan informasi yang jelas tentang tahapan selanjutnya
 - Gunakan emoji 📤 atau 📎 untuk menunjukkan aksi upload dokumen
 - Gunakan emoji ✅ untuk konfirmasi dokumen diterima
+- JANGAN gunakan sapaan di akhir kalimat seperti "Sobat Lantas" kecuali memang sangat diperlukan
 - Tunjukkan sikap siap membantu dan mendorong pengguna untuk melanjutkan
 - Jika pengguna bertanya tentang pelayanan yang tidak ada di database, berikan saran untuk menghubungi kantor polisi terdekat
 
