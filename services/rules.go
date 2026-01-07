@@ -36,22 +36,28 @@ type RulesService struct {
 }
 
 func NewRulesService() *RulesService {
-	service := &RulesService{}
+	service := &RulesService{
+		responseRules: ResponseRules{Sheet1: []ResponseRule{}},
+		locationRules: []LocationRule{},
+	}
 
 	// Load response rules
 	if err := service.loadResponseRules(); err != nil {
-		log.Printf("⚠️  Failed to load response rules: %v", err)
+		log.Printf("⚠️  WARNING: Failed to load response-rules.json: %v", err)
+		log.Printf("⚠️  Rules will not be available, but service will continue with basic flow")
 	} else {
 		log.Printf("✅ Response Rules loaded: %d rules", len(service.responseRules.Sheet1))
 	}
 
 	// Load location rules
 	if err := service.loadLocationRules(); err != nil {
-		log.Printf("⚠️  Failed to load location rules: %v", err)
+		log.Printf("⚠️  WARNING: Failed to load location-rules.json: %v", err)
+		log.Printf("⚠️  Location rules will not be available, but service will continue")
 	} else {
 		log.Printf("✅ Location Rules loaded: %d rules", len(service.locationRules))
 	}
 
+	log.Println("✅ Rules Service initialized (with or without rule files)")
 	return service
 }
 

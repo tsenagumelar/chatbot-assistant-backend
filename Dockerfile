@@ -30,6 +30,12 @@ WORKDIR /root/
 # Copy binary from builder
 COPY --from=builder /app/main .
 
+# Copy required JSON files for rules and data
+COPY --from=builder /app/response-rules.json .
+COPY --from=builder /app/location-rules.json .
+COPY --from=builder /app/data_pelayanan.json .
+COPY --from=builder /app/perpanjangan_sim.json .
+
 # Expose port (default 8080, can be overridden by ENV)
 EXPOSE 8080
 

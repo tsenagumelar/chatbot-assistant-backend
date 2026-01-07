@@ -172,6 +172,8 @@ DETAIL PELANGGARAN:
 		if s.rulesService != nil {
 			responseRule = s.rulesService.GetResponseRule(flow.Title)
 			locationRule = s.rulesService.GetLocationRule(flow.Title)
+		} else {
+			log.Println("⚠️  RulesService is nil, skipping rules lookup")
 		}
 
 		for i, dok := range flow.DocumentsNeeded {
