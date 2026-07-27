@@ -12,6 +12,9 @@ services:
       - OPENAI_API_KEY=
       - ORS_API_KEY=
       - OPENAI_MODEL=gpt-4o-mini
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     healthcheck:
       test:
         [
