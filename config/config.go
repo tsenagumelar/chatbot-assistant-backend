@@ -26,7 +26,7 @@ func LoadConfig() {
 	AppConfig = &Config{
 		Port:         getEnv("PORT", "8080"),
 		OpenAIAPIKey: getEnv("OPENAI_API_KEY", ""),
-		ORSAPIKey:    getEnv("OPENROUTESERVICE_API_KEY", ""),
+		ORSAPIKey:    getEnv("ORS_API_KEY", ""),
 		OpenAIModel:  getEnv("OPENAI_MODEL", "gpt-5.1"),
 	}
 
@@ -35,7 +35,7 @@ func LoadConfig() {
 		log.Fatal("❌ OPENAI_API_KEY is required in .env file")
 	}
 	if AppConfig.ORSAPIKey == "" {
-		log.Fatal("❌ OPENROUTESERVICE_API_KEY is required in .env file")
+		log.Fatal("❌ ORS_API_KEY is required in .env file")
 	}
 
 	log.Println("✅ Configuration loaded successfully")
