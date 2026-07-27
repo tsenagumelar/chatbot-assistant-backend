@@ -36,8 +36,8 @@ COPY --from=builder /app/location-rules.json .
 COPY --from=builder /app/data_pelayanan.json .
 COPY --from=builder /app/perpanjangan_sim.json .
 
-# Expose port (default 8080, can be overridden by ENV)
-EXPOSE 8080
+# Expose port (default 48080, can be overridden by ENV)
+EXPOSE 48080
 
 # Run the binary
 CMD ["./main"]

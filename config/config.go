@@ -24,7 +24,7 @@ func LoadConfig() {
 	}
 
 	AppConfig = &Config{
-		Port:         getEnv("PORT", "8080"),
+		Port:         getEnv("PORT", "48080"),
 		OpenAIAPIKey: getEnv("OPENAI_API_KEY", ""),
 		ORSAPIKey:    getEnv("ORS_API_KEY", ""),
 		OpenAIModel:  getEnv("OPENAI_MODEL", "gpt-5.1"),

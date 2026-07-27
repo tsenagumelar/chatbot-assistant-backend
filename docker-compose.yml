@@ -6,26 +6,16 @@ services:
     image: taufansena/chatbot-backend:latest
     container_name: police-assistant-backend
     restart: unless-stopped
-    ports:
-      - "48080:8080"
+    network_mode: host
     env_file:
       - .env
     environment:
-      - PORT=8080
-    dns:
-      - 1.1.1.1
-      - 8.8.8.8
+      - PORT=48080
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:8080/health"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1:48080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    networks:
-      - chatbot-network
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
-
-networks:
-  chatbot-network:
-    driver: bridge
